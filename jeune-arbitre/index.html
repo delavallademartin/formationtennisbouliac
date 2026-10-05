@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d5c3c">
+<title>Devenir jeune arbitre · Formation Bouliac Tennis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef2e4; --ink: #11281b; --muted: #4c6354;
+    --court: #1d5c3c; --court-ink: #f6f9ee; --line: rgba(246, 249, 238, 0.9);
+    --ball: #dcf53c; --ball-ink: #11281b;
+    --panel: #ffffff; --border: #c5d1b8; --track: #d3dcc6;
+    --ok: #1d5c3c; --ok-ink: #f6f9ee;
+    --retry: #ffffff; --retry-ink: #11281b;
+    --focus: #e0561b;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1a13; --ink: #eaf2de; --muted: #9db3a3;
+      --court: #17503a; --court-ink: #f6f9ee;
+      --ball: #d4ee38; --ball-ink: #11281b;
+      --panel: #16271d; --border: #2d4636; --track: #2a4033;
+      --ok: #dcf53c; --ok-ink: #11281b;
+      --retry: #16271d; --retry-ink: #eaf2de;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1a13; --ink: #eaf2de; --muted: #9db3a3;
+    --court: #17503a; --court-ink: #f6f9ee;
+    --ball: #d4ee38; --ball-ink: #11281b;
+    --panel: #16271d; --border: #2d4636; --track: #2a4033;
+    --ok: #dcf53c; --ok-ink: #11281b;
+    --retry: #16271d; --retry-ink: #eaf2de;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.45; -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 16px 16px 40px; }
+  h1 { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.85rem; line-height: 1.1; margin: 6px 0 6px; }
+  .sub { margin: 0 0 16px; color: var(--muted); font-size: 1rem; }
+  a.homelink, .link {
+    font: inherit; font-weight: 700; color: var(--muted); background: none; border: 0;
+    padding: 4px 0; cursor: pointer; text-decoration: none;
+  }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .lbl { font-weight: 800; font-size: .85rem; color: var(--muted); }
+
+  /* parcours */
+  .path { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .step {
+    display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+    font: inherit; color: inherit; cursor: pointer;
+    background: var(--panel); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px;
+  }
+  .step .num {
+    flex: none; width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; font-family: "Fredoka", system-ui, sans-serif; font-weight: 600; font-size: 1.15rem;
+    background: var(--court); color: var(--court-ink);
+  }
+  .step.final .num { background: var(--ball); color: var(--ball-ink); }
+  .step .txt { flex: 1; }
+  .step .txt b { display: block; font-size: 1.05rem; }
+  .step .txt small { color: var(--muted); font-size: .88rem; }
+  .step .st { flex: none; font-weight: 800; font-size: .85rem; color: var(--court); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .step .st { color: var(--ball); } }
+  :root[data-theme="dark"] .step .st { color: var(--ball); }
+
+  /* points de progression */
+  .dots { display: flex; gap: 6px; margin: 4px 0 12px; }
+  .dot { flex: 1; height: 6px; border-radius: 99px; background: var(--track); }
+  .dot.done { background: var(--court); }
+  .dot.on { background: var(--ball); outline: 1.5px solid var(--court); }
+
+  /* leçon */
+  .lesson { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 10px; }
+  .lesson li { background: var(--panel); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; }
+  .lesson b { font-weight: 800; }
+  .retenir { background: var(--ball); color: var(--ball-ink); border-radius: 16px; padding: 14px 16px; margin-bottom: 16px; font-weight: 700; }
+  .retenir span { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; opacity: .75; margin-bottom: 2px; }
+
+  /* boutons */
+  .btn {
+    font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer;
+    padding: 13px 10px; border-radius: 14px; border: 2px solid var(--court);
+    background: var(--court); color: var(--court-ink);
+  }
+  .btn.big { width: 100%; padding: 16px; font-size: 1.1rem; }
+  .btn.ok { background: var(--ok); color: var(--ok-ink); border-color: var(--ok); }
+  .btn.retry, .btn.alt { background: var(--retry); color: var(--retry-ink); border-color: var(--border); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .stack { display: grid; gap: 10px; margin-top: 12px; }
+
+  /* flash cards */
+  .bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: .9rem; color: var(--muted); font-weight: 700; }
+  .track { height: 6px; background: var(--track); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+  .fill { height: 100%; width: 0; background: var(--court); transition: width .25s ease; }
+  .scene { perspective: 1200px; }
+  .card {
+    position: relative; display: grid; width: 100%; min-height: 320px; cursor: pointer;
+    transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3,.7,.3,1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    grid-area: 1 / 1; position: relative; height: 100%; min-height: 320px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: 18px; padding: 30px 26px;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  }
+  .front { background: var(--court); color: var(--court-ink); }
+  .front::before { content: ""; position: absolute; inset: 11px; border: 2px solid var(--line); border-radius: 8px; pointer-events: none; }
+  .back { background: var(--ball); color: var(--ball-ink); transform: rotateY(180deg); }
+  .cat { align-self: flex-start; font-weight: 800; font-size: .82rem; padding: 3px 11px; border-radius: 99px; background: rgba(246,249,238,.16); }
+  .back .cat { background: rgba(17,40,27,.12); }
+  .q { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 500; font-size: 1.28rem; line-height: 1.3; margin: 0; }
+  .a { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 700; font-size: 1.7rem; line-height: 1.2; margin: 0; }
+  .n { margin: 0; font-size: 1rem; font-weight: 600; opacity: .85; }
+  .hint { margin: 10px 0 0; text-align: center; font-size: .9rem; color: var(--muted); font-weight: 600; min-height: 1.3em; }
+  .nav { display: flex; justify-content: center; margin-top: 10px; }
+
+  /* résultat */
+  .done { background: var(--court); color: var(--court-ink); border-radius: 18px; padding: 28px 24px; text-align: center; }
+  .done h2 { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 4px; }
+  .done .score { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-size: 3rem; font-weight: 700; margin: 2px 0 8px; color: var(--ball); }
+  .done p { margin: 0 0 6px; }
+  .revoir { margin-top: 12px; text-align: left; }
+  .revoir .btn { width: 100%; margin-top: 8px; background: transparent; color: var(--court-ink); border-color: var(--line); text-align: left; }
+  .done .btn.main { width: 100%; background: var(--ball); color: var(--ball-ink); border-color: var(--ball); margin-top: 10px; }
+  .done .btn.sec { width: 100%; background: transparent; color: var(--court-ink); border-color: var(--line); margin-top: 10px; }
+
+  .art { margin-top: 4px; }
+  .art svg { display: block; width: 100%; max-width: 170px; margin: 0 auto; border-radius: 6px; }
+  .goal { font-size: .85rem; font-weight: 700; color: var(--muted); }
+  :root { --good: #d9f2dd; --bad: #f8d7d3; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --good: #1f4a33; --bad: #5a2622; } }
+  :root[data-theme="dark"] { --good: #1f4a33; --bad: #5a2622; }
+  .lesson li.hd { background: none; border: 0; padding: 8px 2px 0; font-weight: 800; font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .step.soon { opacity: .7; cursor: default; }
+  .opts { display: grid; gap: 10px; margin: 14px 0 10px; }
+  .opt { font: inherit; font-weight: 700; text-align: left; cursor: pointer; width: 100%; padding: 14px; border-radius: 14px;
+         background: var(--panel); color: var(--ink); border: 2px solid var(--border); }
+  .opt.good { background: var(--good); border-color: var(--court); }
+  .opt.bad { background: var(--bad); border-color: #b3261e; }
+  .opt:disabled { cursor: default; }
+  .qbox { background: var(--panel); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; }
+  .qbox .q { color: var(--ink); }
+  .expl { margin: 0 0 10px; font-weight: 600; color: var(--muted); }
+  .errs { text-align: left; margin-top: 12px; display: grid; gap: 8px; }
+  .errs div { background: rgba(246,249,238,.12); border-radius: 12px; padding: 10px 12px; font-size: .92rem; }
+  .errs b { font-weight: 800; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .card, .fill { transition: none; } }
+  @media (max-width: 360px) { .q { font-size: 1.15rem; } .a { font-size: 1.5rem; } .face { padding: 26px 22px; } }
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+
+<script>
+/* =====================================================================
+   CONTENU : pour modifier ou ajouter du texte, c'est ici (LEVELS).
+   Niveau AB1 : themes (leçon + flash cards) et bank (banque de questions du quiz de validation).
+   - points : « ## Titre » crée un sous-titre dans la leçon, **mot** met en gras.
+   - bank : { q, ok: "bonne réponse", ko: ["mauvaise", ...], n: "explication", t: n° du thème (0 à 3), img?: {x, d, srv, far, hl, ol, dbl} }
+     Les réponses sont mélangées automatiquement. On peut ajouter autant de questions que l'on veut.
+   ===================================================================== */
+const LEVELS = [
+{
+  id: "ab1", name: "Arbitre Bouliac niveau 1 (AB1)", sub: "Galaxie · jeunes de 10 à 14 ans",
+  intro: "Pour arbitrer les tournois de la Galaxie tennis.",
+  valid: { n: 20, pass: 18 },
+  themes: [
+    {
+      title: "Avant la partie",
+      intro: "Tout ce que fait l'arbitre avant le premier point.",
+      points: [
+        "## Se préparer",
+        "Auprès du **juge arbitre**, tu prends connaissance du **format du match** (liste des formats).",
+        "Tu prends connaissance des **prénoms des joueurs**.",
+        "Tu **récupères les balles** fournies par le juge arbitre.",
+        "Tu **accompagnes les joueurs** jusqu'au terrain.",
+        "## Le terrain",
+        "Tu connais et tu vérifies la **hauteur du filet : 80 cm**.",
+        "Tu t'assures que les **piquets sont enlevés**.",
+        "Tu **tires la languette centrale** pour baisser la hauteur du filet.",
+        "## La réunion au filet",
+        "Tu **rassembles les deux joueurs au filet** et tu **redonnes le format du match**.",
+        "Tu rappelles les **règles de bonne conduite** du code de conduite : jet de balles, jet de raquettes, insultes.",
+        "Les sanctions, dans l'ordre : **avertissement**, **point de pénalité**, **3 points de pénalité**, puis **appel du juge arbitre pour disqualification**.",
+        "## Le tirage au sort et le début",
+        "Tu fais le **tirage au sort avec une raquette**. Tu demandes au vainqueur s'il veut **servir, relancer ou choisir le côté**.",
+        "Tu **lances l'échauffement**. Tu peux rappeler son déroulement : **échanges de fond de court, puis quelques services**.",
+        "Tu **annonces la fin de l'échauffement**.",
+        "Tu **annonces le début de la partie** : « 1ère manche, au service…, prêts ? Jouez ! »"
+      ],
+      retenir: "Format, prénoms, balles, filet à 80 cm, réunion au filet, tirage au sort, échauffement, « Prêts ? Jouez ! »",
+      cards: [
+        { q: "Auprès de qui l'arbitre prend-il connaissance du format du match ?", a: "Auprès du juge arbitre.", n: "Il consulte la liste des formats." },
+        { q: "Qui fournit les balles à l'arbitre ?", a: "Le juge arbitre." },
+        { q: "À quelle hauteur doit être le filet ?", a: "80 cm" },
+        { q: "Que fait l'arbitre pour baisser la hauteur du filet ?", a: "Il tire la languette centrale.", n: "Il s'assure aussi que les piquets sont enlevés." },
+        { q: "Que rappelle l'arbitre aux joueurs, réunis au filet ?", a: "Le format du match et les règles de bonne conduite." },
+        { q: "Quelles sont les sanctions du code de conduite, dans l'ordre ?", a: "Avertissement, point de pénalité, 3 points de pénalité, puis appel du juge arbitre pour disqualification.", n: "Jet de balles, jet de raquettes et insultes sont sanctionnés." },
+        { q: "Comment fait-on le tirage au sort ?", a: "Avec une raquette.", n: "L'arbitre demande ensuite au vainqueur s'il veut servir, relancer ou choisir le côté." },
+        { q: "Comment se déroule l'échauffement ?", a: "Échanges de fond de court, puis quelques services." },
+        { q: "Que dit l'arbitre pour lancer la partie ?", a: "« 1ère manche, au service…, prêts ? Jouez ! »" }
+      ]
+    },
+    {
+      title: "Pendant la partie",
+      intro: "Juger les balles, annoncer le score, connaître son rôle et celui des spectateurs.",
+      points: [
+        "## Les balles bonnes et fautes",
+        "Une balle qui **touche la ligne** est **bonne**. Une balle qui tombe **entièrement en dehors** des lignes est **faute**.",
+        "Tu l'annonces **fort et tout de suite**. Une annonce forte permet aux joueurs de l'entendre sans discuter.",
+        "Au service, la balle doit tomber dans le **bon carré de service**, en **diagonale**.",
+        "Tu sais juger une balle sur la ligne, dans le terrain, en dehors du terrain, dans le couloir.",
+        "Tu **n'annonces pas** les balles dans le filet ni les 2es balles, sauf si les joueurs sont perdus. Tu leur rappelles alors qu'ils ont une **2e chance**.",
+        "## Le let : au service et dans l'échange",
+        "**Au service** : la balle touche le filet (ou la bande du filet) et retombe dans le **bon carré** : c'est un **let**. Tu annonces « **Let !** » fort et tout de suite. Le serveur **rejoue le même service**, sans faute.",
+        "**Au service** : si la balle touche le filet et tombe **hors du carré**, ou si elle tombe **dans le filet**, c'est une **faute**.",
+        "**Pendant l'échange** : une balle qui touche le filet ou la bande et passe de l'autre côté est **bonne**. Le jeu continue : **ce n'est pas un let** et tu ne dis rien.",
+        "**Pendant l'échange**, tu annonces « Let ! » seulement si le point est **gêné** (par exemple une balle venue d'un autre terrain) : on **rejoue le point**.",
+        "## Le score",
+        "Après un échange, tu annonces le score : **15, 30, 40, jeu**.",
+        "À 40A, tu annonces : « **point décisif, choix du côté au relanceur** ».",
+        "Quand un joueur gagne le jeu : « **Jeu** » puis son nom, par exemple « Jeu Martin ».",
+        "Pendant un **jeu décisif**, tu annonces le joueur qui mène : « **2/1 Martin** ». Même principe au **super jeu décisif**.",
+        "## Placement et matériel",
+        "Tu connais le **placement des joueurs en fonction du score** : **0-0 à droite**, **15-0 à gauche**, **15-15 à droite**, **30-15 à gauche**, **30-30 à droite**, **40-30 à gauche**… (nombre de points joués pair → droite, impair → gauche). Au point décisif (40A), le relanceur choisit le côté.",
+        "Tu rappelles le **placement du serveur** : derrière la ligne de fond.",
+        "Ton matériel : un **chronomètre**, mais **surtout pas de téléphone** : c'est interdit !",
+        "Tu connais et tu annonces le **code de conduite** si besoin.",
+        "## Les spectateurs",
+        "On **n'entre pas sur le terrain** (sauf dans les salles). On **ne parle pas aux joueurs**.",
+        "On **ne conteste pas les décisions** et on n'arbitre pas : l'arbitre est là pour ça.",
+        "En revanche, on **encourage**, on **applaudit**, on **reste positif**."
+      ],
+      retenir: "Sur la ligne = bonne. Dehors = faute, annoncée fort et tout de suite. À 40A : point décisif, choix du côté au relanceur. Let au service : on rejoue le service.",
+      cards: [
+        { q: "Un joueur vient de frapper. La balle tombe là. Que dit l'arbitre ?", img: { x: 1.22, d: 8.2, far: true, hl: "Frappeur", ol: "Autre joueur" }, a: "Rien : la balle est bonne.", n: "Elle touche la ligne de côté. Une balle qui touche la ligne est bonne." },
+        { q: "Un joueur vient de frapper, en simple. La balle tombe là. Que dit l'arbitre ?", img: { x: 0.685, d: 8.0, far: true, hl: "Frappeur", ol: "Autre joueur" }, a: "« Faute ! », fort et tout de suite.", n: "Elle tombe dans le couloir, hors du terrain en simple." },
+        { q: "Un joueur sert de sa droite. La balle tombe là. Que dit l'arbitre ?", img: { x: 3.2, d: 4.2, srv: "droite" }, a: "« Faute ! », fort et tout de suite.", n: "Elle tombe dans le mauvais carré : au service, c'est le carré en diagonale." },
+        { q: "Une balle de service tombe dans le filet. L'arbitre l'annonce-t-il ?", a: "Non", n: "Il n'annonce ni les balles dans le filet ni les 2es balles, sauf si les joueurs sont perdus : il leur rappelle alors qu'ils ont une 2e chance." },
+        { q: "Au service, la balle touche la bande du filet et retombe dans le bon carré. Que dit l'arbitre ?", a: "« Let ! », fort et tout de suite.", n: "Le serveur rejoue le même service, sans faute." },
+        { q: "Après un let au service, que fait le serveur ?", a: "Il rejoue le même service.", n: "Sur une 1re balle, il rejoue sa 1re balle. Sur une 2e balle, il rejoue sa 2e balle." },
+        { q: "Au service, la balle touche le filet et tombe hors du carré. Que se passe-t-il ?", a: "C'est une faute.", n: "Ce n'est pas un let : la balle n'est pas tombée dans le bon carré." },
+        { q: "Pendant l'échange, une balle touche le filet et passe de l'autre côté. Que dit l'arbitre ?", a: "Rien : la balle est bonne, le jeu continue.", n: "Dans l'échange, ce n'est pas un let." },
+        { q: "Pendant l'échange, une balle venue d'un autre terrain entre sur le court. Que dit l'arbitre ?", a: "« Let ! » : on rejoue le point.", n: "Le point a été gêné." },
+        { q: "Le score arrive à 40A. Que dit l'arbitre ?", a: "« Point décisif, choix du côté au relanceur »" },
+        { q: "Un joueur gagne le jeu. Que dit l'arbitre ?", a: "« Jeu » puis son nom.", n: "Exemple : « Jeu Martin »." },
+        { q: "Pendant un jeu décisif, comment l'arbitre annonce-t-il le score ?", a: "Il annonce le joueur qui mène.", n: "Exemple : « 2/1 Martin »." },
+        { q: "Quel matériel l'arbitre utilise-t-il ?", a: "Un chronomètre, mais surtout pas de téléphone.", n: "Le téléphone est interdit." },
+        { q: "Que peut faire un spectateur pendant un match ?", a: "Encourager, applaudir et rester positif.", n: "Il ne parle pas aux joueurs et ne conteste pas les décisions." }
+      ]
+    },
+    {
+      title: "Après la partie",
+      intro: "Ce qui se passe quand le match est fini.",
+      points: [
+        "Les joueurs viennent **serrer la main de l'arbitre**.",
+        "L'arbitre **récupère les balles**.",
+        "Il **revient avec les joueurs**.",
+        "Il **donne le score au juge arbitre**."
+      ],
+      retenir: "Poignée de main, balles récupérées, retour avec les joueurs, score au juge arbitre.",
+      cards: [
+        { q: "Que font les joueurs à la fin de la partie ?", a: "Ils viennent serrer la main de l'arbitre." },
+        { q: "Que fait l'arbitre des balles à la fin de la partie ?", a: "Il les récupère." },
+        { q: "Avec qui l'arbitre revient-il après la partie ?", a: "Avec les joueurs." },
+        { q: "À qui l'arbitre donne-t-il le score ?", a: "Au juge arbitre." }
+      ]
+    },
+    {
+      title: "Voix et posture",
+      intro: "Se faire entendre, vite et fort.",
+      points: [
+        "J'annonce les **balles fautes le plus vite possible** et **suffisamment fort** pour être entendu.",
+        "J'annonce le **score à voix haute** et **rapidement** après la fin de l'échange.",
+        "J'annonce les **changements de côté** et j'invite les joueurs à faire une **pause sur leur banc** pour s'alimenter et s'hydrater.",
+        "J'annonce la **fin du match à voix haute** : « victoire de Marius 3/1 – 3/1 »."
+      ],
+      retenir: "Voix haute, annonces rapides, pause au banc aux changements de côté.",
+      cards: [
+        { q: "Comment l'arbitre annonce-t-il une balle faute ?", a: "Le plus vite possible et suffisamment fort pour être entendu." },
+        { q: "Quand l'arbitre annonce-t-il le score ?", a: "Rapidement après la fin de l'échange, à voix haute." },
+        { q: "Que fait l'arbitre aux changements de côté ?", a: "Il les annonce et invite les joueurs à faire une pause sur leur banc." },
+        { q: "Pourquoi invite-t-on les joueurs à faire une pause sur leur banc ?", a: "Pour s'alimenter et s'hydrater." },
+        { q: "Comment l'arbitre annonce-t-il la fin du match ?", a: "À voix haute.", n: "Exemple : « victoire de Marius 3/1 – 3/1 »." }
+      ]
+    }
+  ],
+  bank: [
+    /* Thème 1 : Avant la partie */
+    { t: 0, q: "Auprès de qui l'arbitre prend-il connaissance du format du match ?", ok: "Du juge arbitre", ko: ["Des spectateurs", "Des parents des joueurs", "Du joueur qui sert"] },
+    { t: 0, q: "Que doit connaître l'arbitre au sujet des joueurs avant la partie ?", ok: "Leurs prénoms", ko: ["Leur numéro de licence", "Leur date de naissance", "Leurs résultats passés"] },
+    { t: 0, q: "Qui fournit les balles à l'arbitre ?", ok: "Le juge arbitre", ko: ["Les spectateurs", "Les joueurs", "L'arbitre les apporte de chez lui"] },
+    { t: 0, q: "Où l'arbitre accompagne-t-il les joueurs ?", ok: "Jusqu'au terrain", ko: ["Jusqu'à la buvette", "Jusqu'au vestiaire", "Jusqu'à la table du juge arbitre"] },
+    { t: 0, q: "À quelle hauteur doit être le filet pour les matchs de la Galaxie ?", ok: "80 cm", ko: ["60 cm", "1 m", "1,20 m"] },
+    { t: 0, q: "Que fait l'arbitre des piquets avant la partie ?", ok: "Il s'assure qu'ils sont enlevés", ko: ["Il les plante au milieu du terrain", "Il les laisse en place", "Il les donne aux joueurs"] },
+    { t: 0, q: "Comment baisse-t-on la hauteur du filet ?", ok: "En tirant la languette centrale", ko: ["En enlevant la bande blanche", "En desserrant les piquets", "En changeant le filet"] },
+    { t: 0, q: "Que doit vérifier l'arbitre sur le terrain ?", ok: "La hauteur du filet", ko: ["La couleur des lignes", "La météo", "La température des balles"] },
+    { t: 0, q: "Où l'arbitre rassemble-t-il les deux joueurs avant la partie ?", ok: "Au filet", ko: ["Sur la ligne de fond", "Près du banc", "Derrière le terrain"] },
+    { t: 0, q: "Que rappelle l'arbitre aux joueurs, réunis au filet ?", ok: "Le format du match et les règles de bonne conduite", ko: ["Le classement des joueurs", "Les horaires des autres matchs", "Le prix du tournoi"] },
+    { t: 0, q: "Quels comportements sont sanctionnés par le code de conduite ?", ok: "Jet de balles, jet de raquettes, insultes", ko: ["Boire de l'eau", "Changer de raquette", "Applaudir son adversaire"] },
+    { t: 0, q: "Quelle est la première sanction du code de conduite ?", ok: "Un avertissement", ko: ["Un point de pénalité", "3 points de pénalité", "La disqualification"] },
+    { t: 0, q: "Après l'avertissement, quelle est la sanction suivante ?", ok: "Un point de pénalité", ko: ["3 points de pénalité", "La disqualification immédiate", "Un jeu de pénalité"] },
+    { t: 0, q: "Qui l'arbitre appelle-t-il pour une disqualification ?", ok: "Le juge arbitre", ko: ["Les parents", "Un spectateur", "Le président du club"] },
+    { t: 0, q: "Comment fait-on le tirage au sort ?", ok: "Avec une raquette", ko: ["Avec un dé", "Avec une balle", "Avec un papier tiré au hasard"] },
+    { t: 0, q: "Que demande l'arbitre au vainqueur du tirage au sort ?", ok: "S'il souhaite servir, relancer ou choisir le côté", ko: ["Combien de jeux il veut jouer", "S'il veut un autre arbitre", "S'il veut échauffer 10 minutes"] },
+    { t: 0, q: "Comment se déroule l'échauffement ?", ok: "Échanges de fond de court, puis quelques services", ko: ["Uniquement des services", "Des smashs au filet", "Un jeu d'entraînement noté"] },
+    { t: 0, q: "Que dit l'arbitre pour lancer la partie ?", ok: "« 1ère manche, au service…, prêts ? Jouez ! »", ko: ["« Bonne chance à tous les deux »", "« Service ! »", "« On commence »"] },
+    { t: 0, q: "Que fait l'arbitre à la fin de l'échauffement ?", ok: "Il annonce la fin de l'échauffement", ko: ["Il laisse les joueurs continuer", "Il refait un tirage au sort", "Il sort du terrain"] },
+    /* Thème 2 : Pendant la partie */
+    { t: 1, q: "Une balle touche la ligne. Elle est…", ok: "Bonne", ko: ["Faute", "À rejouer"] },
+    { t: 1, q: "Une balle tombe entièrement en dehors des lignes. Elle est…", ok: "Faute", ko: ["Bonne", "À rejouer"] },
+    { t: 1, q: "Comment l'arbitre annonce-t-il une balle faute ?", ok: "Fort et tout de suite", ko: ["À voix basse", "À la fin du jeu", "Après avoir discuté avec les joueurs"] },
+    { t: 1, q: "Pourquoi annonce-t-on une faute à voix forte ?", ok: "Pour que les joueurs l'entendent sans discuter", ko: ["Pour impressionner les spectateurs", "Pour couvrir le bruit de la balle", "Pour réveiller le juge arbitre"] },
+    { t: 1, q: "Au service, la balle doit tomber dans…", ok: "Le bon carré de service, en diagonale", ko: ["N'importe quel carré", "Le carré juste en face, tout droit", "Le couloir"] },
+    { t: 1, q: "Une balle de service tombe dans le filet. L'arbitre…", ok: "Ne l'annonce pas", ko: ["Annonce « filet »", "Annonce « faute »", "Arrête le jeu"] },
+    { t: 1, q: "Quand l'arbitre annonce-t-il les 2es balles ou les balles dans le filet ?", ok: "Seulement si les joueurs sont perdus", ko: ["Toujours", "Jamais, même si les joueurs sont perdus", "À chaque service"] },
+    { t: 1, q: "Que rappelle l'arbitre à des joueurs perdus ?", ok: "Qu'ils ont une 2e chance", ko: ["Qu'ils ont perdu le point", "Qu'il faut recommencer le jeu", "Qu'ils doivent changer de côté"] },
+    { t: 1, q: "Que fait l'arbitre après un échange ?", ok: "Il annonce le score", ko: ["Il attend la fin du jeu", "Il appelle le juge arbitre", "Il change de côté"] },
+    { t: 1, q: "Comment compte-t-on dans un jeu classique ?", ok: "15, 30, 40, jeu", ko: ["1, 2, 3, jeu", "10, 20, 30, jeu", "15, 30, 45, jeu"] },
+    { t: 1, q: "Que dit l'arbitre à 40A ?", ok: "Point décisif, choix du côté au relanceur", ko: ["Avantage au serveur", "Égalité, deux points d'écart", "Jeu décisif"] },
+    { t: 1, q: "Au point décisif, qui choisit le côté ?", ok: "Le relanceur", ko: ["Le serveur", "L'arbitre", "Le juge arbitre"] },
+    { t: 1, q: "Un joueur gagne le jeu. Que dit l'arbitre ?", ok: "« Jeu » puis le nom du joueur", ko: ["« Point » puis le nom du joueur", "« Manche » puis le nom du joueur", "Seulement le score"] },
+    { t: 1, q: "Pendant un jeu décisif, comment l'arbitre annonce-t-il le score ?", ok: "Il annonce le joueur qui mène, par exemple « 2/1 Martin »", ko: ["Il dit 15, 30, 40", "Il dit seulement le prénom du serveur", "Il ne dit rien jusqu'à la fin"] },
+    { t: 1, q: "Quel matériel l'arbitre utilise-t-il ?", ok: "Un chronomètre", ko: ["Un téléphone", "Un sifflet", "Un mégaphone"] },
+    { t: 1, q: "L'arbitre peut-il utiliser un téléphone ?", ok: "Non, c'est interdit", ko: ["Oui, pour chronométrer", "Oui, pour prendre des photos", "Oui, entre deux jeux"] },
+    { t: 1, q: "Où l'arbitre rappelle-t-il que le serveur doit se placer ?", ok: "Derrière la ligne de fond", ko: ["Devant la ligne de service", "Sur la ligne de service", "Au filet"] },
+    { t: 1, q: "Un joueur lance sa raquette. Que fait l'arbitre ?", ok: "Il annonce le code de conduite", ko: ["Il ignore", "Il change le score sans rien dire", "Il quitte le terrain"] },
+    { t: 1, q: "Un spectateur peut-il parler aux joueurs pendant le match ?", ok: "Non", ko: ["Oui", "Seulement aux changements de côté"] },
+    { t: 1, q: "Un spectateur peut-il contester une décision de l'arbitre ?", ok: "Non : l'arbitre est là pour ça", ko: ["Oui, s'il est sûr de lui", "Oui, s'il est un parent"] },
+    { t: 1, q: "Que peut faire un spectateur ?", ok: "Encourager, applaudir et rester positif", ko: ["Donner des conseils aux joueurs", "Corriger l'arbitre", "Entrer sur le terrain"] },
+    { t: 1, q: "Un joueur vient de frapper. La balle tombe là. Que dit l'arbitre ?", img: { x: 1.22, d: 8.2, far: true, hl: "Frappeur", ol: "Autre joueur" }, ok: "Rien : la balle est bonne", ko: ["« Faute ! »", "« Filet ! »"], n: "Elle touche la ligne de côté : une balle qui touche la ligne est bonne." },
+    { t: 1, q: "Un joueur vient de frapper, en simple. La balle tombe là. Que dit l'arbitre ?", img: { x: 0.685, d: 8.0, far: true, hl: "Frappeur", ol: "Autre joueur" }, ok: "« Faute ! »", ko: ["Rien : la balle est bonne", "« Let ! »"], n: "Elle tombe dans le couloir, hors du terrain en simple." },
+    { t: 1, q: "Un joueur sert de sa droite. La balle tombe là. Que dit l'arbitre ?", img: { x: 3.2, d: 4.2, srv: "droite" }, ok: "« Faute ! »", ko: ["Rien : la balle est bonne", "« Filet ! »"], n: "Elle tombe dans le mauvais carré : au service, c'est le carré en diagonale." },
+    { t: 1, q: "Un joueur sert de sa droite. La balle tombe là. Que dit l'arbitre ?", img: { x: 7.6, d: 4.0, srv: "droite" }, ok: "Rien : la balle est bonne", ko: ["« Faute ! »", "« Filet ! »"], n: "Elle tombe dans le bon carré, en diagonale." },
+    { t: 1, q: "Un joueur vient de frapper. La balle tombe là. Que dit l'arbitre ?", img: { x: 5.0, d: 12.835, far: true, hl: "Frappeur", ol: "Autre joueur" }, ok: "« Faute ! »", ko: ["Rien : la balle est bonne", "« Let ! »"], n: "Elle tombe derrière la ligne de fond." },
+    { t: 1, q: "Au service, la balle touche la bande du filet et retombe dans le bon carré. C'est…", ok: "Un let", ko: ["Une faute", "Un point pour le serveur", "Un point pour le relanceur"] },
+    { t: 1, q: "Que dit l'arbitre quand il y a un let au service ?", ok: "« Let ! », fort et tout de suite", ko: ["Rien", "« Faute ! »", "« Filet ! »"] },
+    { t: 1, q: "Après un let au service, que fait le serveur ?", ok: "Il rejoue le même service", ko: ["Il perd le point", "Il sert directement sa 2e balle", "Il change de côté"] },
+    { t: 1, q: "Un let a lieu sur une 2e balle de service. Que fait le serveur ?", ok: "Il rejoue sa 2e balle", ko: ["Il fait une double faute", "Il rejoue sa 1re balle", "Il perd le point"] },
+    { t: 1, q: "Au service, la balle touche le filet puis tombe hors du carré. C'est…", ok: "Une faute", ko: ["Un let", "Un point pour le serveur", "Une balle à rejouer"] },
+    { t: 1, q: "Une balle de service tombe dans le filet. C'est…", ok: "Une faute", ko: ["Un let", "Une balle bonne", "Un point pour le serveur"] },
+    { t: 1, q: "Au service, qu'est-ce qui décide si une balle qui touche le filet est un let ou une faute ?", ok: "L'endroit où elle retombe : dans le bon carré, c'est un let", ko: ["La force du service", "Le nom du serveur", "La hauteur du filet"] },
+    { t: 1, q: "Pendant l'échange, une balle touche la bande du filet et passe de l'autre côté. L'arbitre dit…", ok: "Rien : la balle est bonne", ko: ["« Let ! »", "« Faute ! »"] },
+    { t: 1, q: "Une balle venue d'un autre terrain entre sur le court pendant l'échange. Que dit l'arbitre ?", ok: "« Let ! » : on rejoue le point", ko: ["« Faute ! »", "Rien, le jeu continue", "Le point est pour le serveur"] },
+    { t: 1, q: "Une balle touche le filet et passe de l'autre côté. Quelle est la différence entre le service et l'échange ?", ok: "Au service, c'est un let si elle tombe dans le bon carré. Dans l'échange, elle est bonne", ko: ["Aucune différence", "Au service elle est bonne, dans l'échange c'est un let", "Dans les deux cas, c'est faute"] },
+    /* Thème 3 : Après la partie */
+    { t: 2, q: "Que font les joueurs à la fin du match ?", ok: "Ils viennent serrer la main de l'arbitre", ko: ["Ils quittent le terrain sans rien dire", "Ils recommencent un échauffement", "Ils donnent le score aux spectateurs"] },
+    { t: 2, q: "Que fait l'arbitre des balles à la fin du match ?", ok: "Il les récupère", ko: ["Il les donne aux spectateurs", "Il les laisse sur le terrain", "Il les range dans son sac"] },
+    { t: 2, q: "Avec qui l'arbitre revient-il après le match ?", ok: "Avec les joueurs", ko: ["Avec les spectateurs", "Tout seul", "Avec le vainqueur seulement"] },
+    { t: 2, q: "À qui l'arbitre donne-t-il le score ?", ok: "Au juge arbitre", ko: ["Aux spectateurs", "Au club adverse", "Aux joueurs seulement"] },
+    { t: 2, q: "Que donne l'arbitre au juge arbitre à la fin du match ?", ok: "Le score", ko: ["Le chronomètre", "La liste des spectateurs", "Le filet"] },
+    /* Thème 4 : Voix et posture */
+    { t: 3, q: "Comment l'arbitre annonce-t-il les balles fautes ?", ok: "Le plus vite possible et suffisamment fort pour être entendu", ko: ["Doucement, pour ne pas déranger", "À la fin de l'échange", "Après avoir demandé l'avis des spectateurs"] },
+    { t: 3, q: "Quand l'arbitre annonce-t-il le score ?", ok: "Rapidement après la fin de l'échange", ko: ["À la fin du jeu seulement", "Une minute après l'échange", "Seulement si un joueur le demande"] },
+    { t: 3, q: "Comment l'arbitre annonce-t-il le score ?", ok: "À voix haute", ko: ["À voix basse", "En le chuchotant à un joueur", "En l'écrivant sur une feuille"] },
+    { t: 3, q: "Que fait l'arbitre aux changements de côté ?", ok: "Il les annonce et invite les joueurs à une pause sur leur banc", ko: ["Il continue sans rien dire", "Il demande aux joueurs de rester debout", "Il arrête le match"] },
+    { t: 3, q: "Pourquoi invite-t-on les joueurs à faire une pause sur leur banc ?", ok: "Pour s'alimenter et s'hydrater", ko: ["Pour discuter avec le juge arbitre", "Pour changer de raquette", "Pour regarder le score"] },
+    { t: 3, q: "Comment l'arbitre annonce-t-il la fin du match ?", ok: "À voix haute, par exemple « victoire de Marius 3/1 – 3/1 »", ko: ["Sans rien dire", "En disant seulement « terminé »", "Par un geste de la main"] }
+  ]
+},
+{
+  id: "ab2", name: "Arbitre Bouliac niveau 2 (AB2)", sub: "Ados et adultes",
+  intro: "Avec le diplôme A1, à passer pour les adhérents de 15 ans et plus qui le souhaitent.",
+  soon: true
+}
+];
+
+/* ---------------- Terrain entier avec joueurs et balle (vue de dessus) ---------------- */
+const CS = 14, CMX = 1.3, CMY = 2.0, CW = 10.97, CL = 11.885, CSL = 6.4, CAL = 1.37, CR = 6;
+function court(img, label) {
+  const w = (CW + 2 * CMX) * CS, h = (2 * CL + 2 * CMY) * CS;
+  const X = v => (CMX + v) * CS, Y = v => (CMY + v) * CS;
+  const ln = (a, b, c, d) => '<line x1="' + X(a) + '" y1="' + Y(b) + '" x2="' + X(c) + '" y2="' + Y(d) + '"/>';
+  const bx = img.x, by = img.far ? CL - img.d : CL + img.d;
+  const hitTop = img.srv ? true : !img.far;
+  const hl = img.srv ? "Serveur" : (img.hl || "Frappeur"), ol = img.srv ? "Relanceur" : (img.ol || "Adversaire");
+  const topY = -0.8, botY = 2 * CL + 0.8;
+  const hy = hitTop ? topY : botY, oy = hitTop ? botY : topY;
+  const hx = img.srv ? CW / 2 + (img.srv === "droite" ? -1.4 : 1.4) : CW / 2;
+  const ox = img.srv ? CW / 2 : (bx < CW / 2 ? CW / 2 + 1.0 : CW / 2 - 1.0);
+  const px = v => Math.abs(v - CW / 2) < 0.5 ? CW / 2 + 2.5 : CW - v;
+  const pl = (x, y, fill, stroke, r, text, dir) => {
+    let s = '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5"/>';
+    if (text) {
+      const right = dir ? dir === "r" : X(x) <= w / 2 + 1;
+      s += '<text x="' + (X(x) + (right ? 13 : -13)) + '" y="' + (Y(y) + 4) + '" font-size="11" fill="#ffffff" text-anchor="' + (right ? "start" : "end") + '">' + esc(text) + '</text>';
+    }
+    return s;
+  };
+  let s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img"><title>' + esc(label) + '</title>';
+  s += '<rect x="0" y="0" width="' + w + '" height="' + h + '" fill="#3f8a55"/>';
+  s += '<rect x="' + X(0) + '" y="' + Y(0) + '" width="' + (CW * CS) + '" height="' + (2 * CL * CS) + '" fill="#2f6db5"/>';
+  s += '<g stroke="#ffffff" stroke-width="2.2" fill="none" stroke-linecap="square">';
+  s += ln(0, 0, CW, 0) + ln(0, 2 * CL, CW, 2 * CL) + ln(0, 0, 0, 2 * CL) + ln(CW, 0, CW, 2 * CL) + ln(CAL, 0, CAL, 2 * CL) + ln(CW - CAL, 0, CW - CAL, 2 * CL);
+  s += ln(CAL, CL - CSL, CW - CAL, CL - CSL) + ln(CAL, CL + CSL, CW - CAL, CL + CSL) + ln(CW / 2, CL - CSL, CW / 2, CL + CSL);
+  s += ln(CW / 2, 0, CW / 2, 0.45) + ln(CW / 2, 2 * CL, CW / 2, 2 * CL - 0.45) + '</g>';
+  s += '<rect x="' + (X(0) - 6) + '" y="' + (Y(CL) - 2.5) + '" width="' + (CW * CS + 12) + '" height="5" fill="#f2f2f2" stroke="#444444" stroke-width="0.5"/>';
+  s += '<line x1="' + X(hx) + '" y1="' + Y(hy) + '" x2="' + X(bx) + '" y2="' + Y(by) + '" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85"/>';
+  if (img.dbl) {
+    s += pl(px(hx), hitTop ? CL - 1.8 : CL + 1.8, "#ff7a1a", "#ffffff", 6, "");
+    s += pl(px(ox), hitTop ? CL + 1.8 : CL - 1.8, "#f2f2f2", "#444444", 6, "");
+  }
+  s += pl(hx, hy, "#ff7a1a", "#ffffff", 7, hl);
+  s += pl(ox, oy, "#f2f2f2", "#444444", 7, ol, img.srv ? "" : (bx < CW / 2 ? "r" : "l"));
+  s += '<circle cx="' + X(bx) + '" cy="' + Y(by) + '" r="' + CR + '" fill="#d9e83f" stroke="#6f7d0c" stroke-width="1"/></svg>';
+  return s;
+}
+
+/* ---------------- Progression (gardée sur l'appareil) ---------------- */
+const KEY = "formation-tcb-arbitre-v1";
+let P = { done: {} };
+function loadP() { try { const d = JSON.parse(localStorage.getItem(KEY) || "null"); if (d && d.done) P = d; } catch (e) {} }
+function saveP() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} }
+function pk(li, x) { return LEVELS[li].id + "-" + x; }
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function fmt(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+function shuffled(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+let V = { view: "home" };
+
+function dots(li, active) {
+  const L = LEVELS[li];
+  let h = '<div class="dots" aria-hidden="true">';
+  for (let i = 0; i <= L.themes.length; i++) {
+    const key = pk(li, i === L.themes.length ? "v" : "t" + i);
+    const d = P.done[key];
+    h += '<span class="dot' + (i === active ? " on" : (d && (i < L.themes.length || d.passed)) ? " done" : "") + '"></span>';
+  }
+  return h + '</div>';
+}
+
+/* ---------------- Vues ---------------- */
+function homeHTML() {
+  let h = '<a class="homelink" href="../">← Accueil</a><h1>Devenir jeune arbitre</h1>' +
+    '<p class="sub">Deux niveaux de formation. Chaque niveau : des leçons, des flash cards pour réviser, puis un quiz de validation.</p><ol class="path">';
+  LEVELS.forEach((L, i) => {
+    if (L.soon) {
+      h += '<li><div class="step soon"><span class="num">' + (i + 1) + '</span><span class="txt"><b>' + esc(L.name) + '</b><small>' + esc(L.sub) + ' · ' + esc(L.intro) + '</small></span><span class="st">Bientôt</span></div></li>';
+    } else {
+      const v = P.done[pk(i, "v")];
+      h += '<li><button class="step" data-act="level" data-l="' + i + '" type="button"><span class="num">' + (i + 1) + '</span>' +
+        '<span class="txt"><b>' + esc(L.name) + '</b><small>' + esc(L.sub) + ' · ' + esc(L.intro) + '</small></span>' +
+        (v && v.passed ? '<span class="st">✓ Validé</span>' : "") + '</button></li>';
+    }
+  });
+  return h + '</ol>';
+}
+
+function levelHTML() {
+  const li = V.li, L = LEVELS[li], v = P.done[pk(li, "v")];
+  let h = '<div class="topbar"><button class="link" data-act="home" type="button">← Niveaux</button><span class="lbl">' + esc(L.sub) + '</span></div>' +
+    '<h1>' + esc(L.name) + '</h1><p class="sub">' + esc(L.intro) + '</p>' +
+    '<div class="valider"><b>Pour valider ce niveau</b><ul><li>Suivre les ' + L.themes.length + ' thèmes : une leçon, puis des flash cards pour réviser.</li>' +
+    '<li>Réussir le quiz de validation : ' + L.valid.pass + ' bonnes réponses sur ' + L.valid.n + '.</li></ul></div><ol class="path">';
+  L.themes.forEach((t, i) => {
+    const d = P.done[pk(li, "t" + i)];
+    h += '<li><button class="step" data-act="theme" data-l="' + li + '" data-i="' + i + '" type="button"><span class="num">' + (i + 1) + '</span>' +
+      '<span class="txt"><b>' + esc(t.title) + '</b><small>' + esc(t.intro) + '</small></span>' +
+      (d ? '<span class="st">✓ ' + d.k + '/' + d.n + '</span>' : "") + '</button></li>';
+  });
+  h += '<li><button class="step final" data-act="quiz" data-l="' + li + '" type="button"><span class="num">★</span>' +
+    '<span class="txt"><b>Quiz de validation</b><small>' + L.valid.n + ' questions au hasard parmi ' + L.bank.length + ' · validation à ' + L.valid.pass + '/' + L.valid.n + '</small></span>' +
+    (v ? '<span class="st">' + (v.passed ? "✓ Validé" : "Dernier : " + v.k + "/" + v.n) + '</span>' : "") + '</button></li></ol>';
+  return h;
+}
+
+function lessonHTML() {
+  const li = V.li, i = V.ti, L = LEVELS[li], t = L.themes[i];
+  const items = t.points.map(p => p.indexOf("## ") === 0 ? '<li class="hd">' + esc(p.slice(3)) + '</li>' : '<li>' + fmt(p) + '</li>').join("");
+  return '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← ' + esc(L.name.split(" (")[1] ? L.name.split(" (")[1].replace(")", "") : L.name) + '</button>' +
+    '<span class="lbl">Thème ' + (i + 1) + ' sur ' + L.themes.length + '</span></div>' + dots(li, i) +
+    '<h1>' + esc(t.title) + '</h1><p class="sub">' + esc(t.intro) + '</p>' +
+    '<ul class="lesson">' + items + '</ul>' +
+    '<div class="retenir"><span>À retenir</span>' + esc(t.retenir) + '</div>' +
+    '<button class="btn big" data-act="cards" type="button">Réviser avec les flash cards (' + t.cards.length + ')</button>';
+}
+
+function deckHTML() {
+  const total = V.cards.length, k = V.cards[V.idx], L = LEVELS[V.li];
+  return '<div class="topbar"><button class="link" data-act="level" data-l="' + V.li + '" type="button">← Niveau</button>' +
+    '<span class="lbl">Flash cards · Thème ' + (V.ti + 1) + '</span></div>' +
+    '<div class="bar"><span>Carte ' + (V.idx + 1) + ' sur ' + total + '</span></div>' +
+    '<div class="track" aria-hidden="true"><div class="fill" style="width:' + (V.idx / total * 100) + '%"></div></div>' +
+    '<div class="scene"><div class="card' + (V.flipped ? " flipped" : "") + '" id="card" role="button" tabindex="0" aria-label="Carte : retourner pour voir la réponse">' +
+      '<div class="face front" aria-hidden="' + V.flipped + '"><span class="cat">' + esc(L.themes[V.ti].title) + '</span><p class="q">' + esc(k.q) + '</p>' +
+        (k.img ? '<div class="art">' + court(k.img, k.q) + '</div>' : "") + '</div>' +
+      '<div class="face back" aria-hidden="' + (!V.flipped) + '"><span class="cat">Réponse</span><p class="a">' + esc(k.a) + '</p>' + (k.n ? '<p class="n">' + esc(k.n) + '</p>' : "") + '</div>' +
+    '</div></div>' +
+    '<p class="hint" id="hint">' + (V.flipped ? "Tu le savais ?" : "Touche la carte pour voir la réponse") + '</p>' +
+    '<div class="actions"><button class="btn retry" id="bRetry" data-act="no" type="button"' + (V.flipped ? "" : " disabled") + '>À revoir</button>' +
+    '<button class="btn ok" id="bOk" data-act="yes" type="button"' + (V.flipped ? "" : " disabled") + '>Je savais</button></div>' +
+    '<div class="nav"><button class="link" data-act="skip" type="button">Passer</button></div>';
+}
+
+function resultHTML() {
+  const li = V.li, L = LEVELS[li], n = V.cards.length, k = V.known, miss = V.missed;
+  const msg = k === n ? "Parfait, aucune erreur !" : k / n >= 0.7 ? "Bien joué !" : "Continue, tu progresses !";
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← Niveau</button><span class="lbl">Thème ' + (V.ti + 1) + '</span></div>' +
+    '<div class="done"><h2>' + msg + '</h2><div class="score">' + k + ' / ' + n + '</div>';
+  if (miss.length) h += '<button class="btn main" data-act="redo" type="button">Refaire les ' + miss.length + ' cartes à revoir</button>';
+  const cls = miss.length ? "sec" : "main";
+  if (V.ti < L.themes.length - 1) {
+    h += '<button class="btn ' + cls + '" data-act="theme" data-l="' + li + '" data-i="' + (V.ti + 1) + '" type="button">Thème suivant : ' + esc(L.themes[V.ti + 1].title) + '</button>';
+  } else {
+    h += '<button class="btn ' + cls + '" data-act="quiz" data-l="' + li + '" type="button">Passer au quiz de validation</button>';
+  }
+  return h + '<button class="btn sec" data-act="level" data-l="' + li + '" type="button">Retour au niveau</button></div>';
+}
+
+function quizHTML() {
+  const L = LEVELS[V.li], q = V.qs[V.idx], total = V.qs.length;
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + V.li + '" type="button">← Niveau</button>' +
+    '<span class="lbl">Quiz de validation</span></div>' +
+    '<div class="bar"><span>Question ' + (V.idx + 1) + ' sur ' + total + '</span><span>Objectif : ' + L.valid.pass + '/' + L.valid.n + '</span></div>' +
+    '<div class="track" aria-hidden="true"><div class="fill" style="width:' + (V.idx / total * 100) + '%"></div></div>' +
+    '<div class="qbox"><p class="q">' + esc(q.q) + '</p>' + (q.img ? '<div class="art">' + court(q.img, q.q) + '</div>' : "") + '</div><div class="opts">';
+  q.opts.forEach((o, i) => {
+    let cls = "opt";
+    if (V.answered) cls += o.c ? " good" : (i === V.chosen ? " bad" : "");
+    h += '<button class="' + cls + '" data-act="opt" data-i="' + i + '" type="button"' + (V.answered ? " disabled" : "") + '>' + esc(o.t) + '</button>';
+  });
+  h += '</div>';
+  if (V.answered) {
+    const good = q.opts[V.chosen].c;
+    h += '<p class="expl">' + (good ? "Bonne réponse !" : "Pas tout à fait.") + (q.n ? " " + esc(q.n) : "") + '</p>' +
+      '<button class="btn big" data-act="qnext" type="button">' + (V.idx + 1 < total ? "Question suivante" : "Voir mon résultat") + '</button>';
+  }
+  return h;
+}
+
+function qresultHTML() {
+  const li = V.li, L = LEVELS[li], n = V.qs.length, k = V.score, passed = k >= L.valid.pass;
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← Niveau</button><span class="lbl">Quiz de validation</span></div>' +
+    '<div class="done"><h2>' + (passed ? "Bravo, niveau validé !" : "Pas encore validé") + '</h2><div class="score">' + k + ' / ' + n + '</div>' +
+    '<p>' + (passed ? "Tu as réussi le quiz de validation de " + esc(L.name) + "." : "Il faut " + L.valid.pass + " bonnes réponses sur " + L.valid.n + ". Tu peux recommencer avec de nouvelles questions.") + '</p>';
+  if (V.wrong.length) {
+    h += '<div class="errs">' + V.wrong.map(w => '<div><b>' + esc(w.q) + '</b><br>Ta réponse : ' + esc(w.mine) + '<br>Bonne réponse : ' + esc(w.good) + '</div>').join("") + '</div>';
+  }
+  h += '<button class="btn main" data-act="quiz" data-l="' + li + '" type="button">' + (passed ? "Refaire un quiz" : "Recommencer avec de nouvelles questions") + '</button>';
+  if (!passed) h += '<button class="btn sec" data-act="level" data-l="' + li + '" type="button">Revoir les leçons</button>';
+  else h += '<button class="btn sec" data-act="home" type="button">Retour aux niveaux</button>';
+  return h + '</div>';
+}
+
+function render() {
+  const v = V.view;
+  document.getElementById("app").innerHTML =
+    v === "home" ? homeHTML() : v === "level" ? levelHTML() : v === "lesson" ? lessonHTML() :
+    v === "deck" ? deckHTML() : v === "result" ? resultHTML() : v === "quiz" ? quizHTML() : qresultHTML();
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- Actions ---------------- */
+function startDeck(li, ti) {
+  V = { view: "deck", li, ti, cards: LEVELS[li].themes[ti].cards.slice(), idx: 0, flipped: false, known: 0, missed: [], full: true };
+  render();
+}
+function nextCard(ok) {
+  if (ok) V.known++; else V.missed.push(V.cards[V.idx]);
+  V.idx++; V.flipped = false;
+  if (V.idx >= V.cards.length) {
+    if (V.full) { P.done[pk(V.li, "t" + V.ti)] = { k: V.known, n: V.cards.length }; saveP(); }
+    V.view = "result";
+  }
+  render();
+}
+function flip() {
+  V.flipped = !V.flipped;
+  const c = document.getElementById("card");
+  c.classList.toggle("flipped", V.flipped);
+  c.querySelector(".front").setAttribute("aria-hidden", String(V.flipped));
+  c.querySelector(".back").setAttribute("aria-hidden", String(!V.flipped));
+  document.getElementById("bRetry").disabled = !V.flipped;
+  document.getElementById("bOk").disabled = !V.flipped;
+  document.getElementById("hint").textContent = V.flipped ? "Tu le savais ?" : "Touche la carte pour voir la réponse";
+}
+
+function startQuiz(li) {
+  const L = LEVELS[li], n = Math.min(L.valid.n, L.bank.length);
+  const qs = shuffled(L.bank).slice(0, n).map(q => Object.assign({}, q, {
+    opts: shuffled([{ t: q.ok, c: true }].concat(q.ko.map(t => ({ t, c: false }))))
+  }));
+  V = { view: "quiz", li, qs, idx: 0, score: 0, chosen: null, answered: false, wrong: [] };
+  render();
+}
+function pick(i) {
+  if (V.answered) return;
+  const q = V.qs[V.idx];
+  V.chosen = i; V.answered = true;
+  if (q.opts[i].c) V.score++;
+  else V.wrong.push({ q: q.q, mine: q.opts[i].t, good: q.ok });
+  render();
+}
+function qnext() {
+  V.idx++; V.chosen = null; V.answered = false;
+  if (V.idx >= V.qs.length) {
+    const L = LEVELS[V.li], passed = V.score >= L.valid.pass, old = P.done[pk(V.li, "v")];
+    P.done[pk(V.li, "v")] = { k: V.score, n: V.qs.length, passed: passed || !!(old && old.passed) };
+    saveP();
+    V.view = "qresult";
+  }
+  render();
+}
+
+document.addEventListener("click", e => {
+  if (e.target.closest("#card")) { flip(); return; }
+  const t = e.target.closest("[data-act]");
+  if (!t || t.disabled) return;
+  const a = t.dataset.act, l = +t.dataset.l;
+  if (a === "home") { V = { view: "home" }; render(); }
+  else if (a === "level") { V = { view: "level", li: l }; render(); }
+  else if (a === "theme") { V = { view: "lesson", li: l, ti: +t.dataset.i }; render(); }
+  else if (a === "cards") startDeck(V.li, V.ti);
+  else if (a === "yes") nextCard(true);
+  else if (a === "no" || a === "skip") nextCard(false);
+  else if (a === "redo") { V = Object.assign({}, V, { view: "deck", cards: V.missed.slice(), idx: 0, flipped: false, known: 0, missed: [], full: false }); render(); }
+  else if (a === "quiz") startQuiz(l);
+  else if (a === "opt") pick(+t.dataset.i);
+  else if (a === "qnext") qnext();
+});
+document.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && document.activeElement && document.activeElement.id === "card") { e.preventDefault(); flip(); }
+});
+
+loadP();
+render();
+</script>
+</body>
+</html>

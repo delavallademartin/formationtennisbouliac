@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d5c3c">
+<title>Se préparer à la compétition · Formation Bouliac Tennis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef2e4; --ink: #11281b; --muted: #4c6354;
+    --court: #1d5c3c; --court-ink: #f6f9ee; --line: rgba(246, 249, 238, 0.9);
+    --ball: #dcf53c; --ball-ink: #11281b;
+    --panel: #ffffff; --border: #c5d1b8; --track: #d3dcc6;
+    --ok: #1d5c3c; --ok-ink: #f6f9ee;
+    --retry: #ffffff; --retry-ink: #11281b;
+    --focus: #e0561b;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1a13; --ink: #eaf2de; --muted: #9db3a3;
+      --court: #17503a; --court-ink: #f6f9ee;
+      --ball: #d4ee38; --ball-ink: #11281b;
+      --panel: #16271d; --border: #2d4636; --track: #2a4033;
+      --ok: #dcf53c; --ok-ink: #11281b;
+      --retry: #16271d; --retry-ink: #eaf2de;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1a13; --ink: #eaf2de; --muted: #9db3a3;
+    --court: #17503a; --court-ink: #f6f9ee;
+    --ball: #d4ee38; --ball-ink: #11281b;
+    --panel: #16271d; --border: #2d4636; --track: #2a4033;
+    --ok: #dcf53c; --ok-ink: #11281b;
+    --retry: #16271d; --retry-ink: #eaf2de;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.45; -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 16px 16px 40px; }
+  h1 { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.85rem; line-height: 1.1; margin: 6px 0 6px; }
+  .sub { margin: 0 0 16px; color: var(--muted); font-size: 1rem; }
+  a.homelink, .link {
+    font: inherit; font-weight: 700; color: var(--muted); background: none; border: 0;
+    padding: 4px 0; cursor: pointer; text-decoration: none;
+  }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .lbl { font-weight: 800; font-size: .85rem; color: var(--muted); }
+
+  /* parcours */
+  .path { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .step {
+    display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+    font: inherit; color: inherit; cursor: pointer;
+    background: var(--panel); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px;
+  }
+  .step .num {
+    flex: none; width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; font-family: "Fredoka", system-ui, sans-serif; font-weight: 600; font-size: 1.15rem;
+    background: var(--court); color: var(--court-ink);
+  }
+  .step.final .num { background: var(--ball); color: var(--ball-ink); }
+  .step .txt { flex: 1; }
+  .step .txt b { display: block; font-size: 1.05rem; }
+  .step .txt small { color: var(--muted); font-size: .88rem; }
+  .step .st { flex: none; font-weight: 800; font-size: .85rem; color: var(--court); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .step .st { color: var(--ball); } }
+  :root[data-theme="dark"] .step .st { color: var(--ball); }
+
+  /* points de progression */
+  .dots { display: flex; gap: 6px; margin: 4px 0 12px; }
+  .dot { flex: 1; height: 6px; border-radius: 99px; background: var(--track); }
+  .dot.done { background: var(--court); }
+  .dot.on { background: var(--ball); outline: 1.5px solid var(--court); }
+
+  /* leçon */
+  .lesson { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 10px; }
+  .lesson li { background: var(--panel); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; }
+  .lesson b { font-weight: 800; }
+  .retenir { background: var(--ball); color: var(--ball-ink); border-radius: 16px; padding: 14px 16px; margin-bottom: 16px; font-weight: 700; }
+  .retenir span { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; opacity: .75; margin-bottom: 2px; }
+
+  /* boutons */
+  .btn {
+    font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer;
+    padding: 13px 10px; border-radius: 14px; border: 2px solid var(--court);
+    background: var(--court); color: var(--court-ink);
+  }
+  .btn.big { width: 100%; padding: 16px; font-size: 1.1rem; }
+  .btn.ok { background: var(--ok); color: var(--ok-ink); border-color: var(--ok); }
+  .btn.retry, .btn.alt { background: var(--retry); color: var(--retry-ink); border-color: var(--border); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .stack { display: grid; gap: 10px; margin-top: 12px; }
+
+  /* flash cards */
+  .bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: .9rem; color: var(--muted); font-weight: 700; }
+  .track { height: 6px; background: var(--track); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+  .fill { height: 100%; width: 0; background: var(--court); transition: width .25s ease; }
+  .scene { perspective: 1200px; }
+  .card {
+    position: relative; display: grid; width: 100%; min-height: 320px; cursor: pointer;
+    transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3,.7,.3,1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    grid-area: 1 / 1; position: relative; height: 100%; min-height: 320px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: 18px; padding: 30px 26px;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  }
+  .front { background: var(--court); color: var(--court-ink); }
+  .front::before { content: ""; position: absolute; inset: 11px; border: 2px solid var(--line); border-radius: 8px; pointer-events: none; }
+  .back { background: var(--ball); color: var(--ball-ink); transform: rotateY(180deg); }
+  .cat { align-self: flex-start; font-weight: 800; font-size: .82rem; padding: 3px 11px; border-radius: 99px; background: rgba(246,249,238,.16); }
+  .back .cat { background: rgba(17,40,27,.12); }
+  .q { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 500; font-size: 1.28rem; line-height: 1.3; margin: 0; }
+  .a { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 700; font-size: 1.7rem; line-height: 1.2; margin: 0; }
+  .n { margin: 0; font-size: 1rem; font-weight: 600; opacity: .85; }
+  .hint { margin: 10px 0 0; text-align: center; font-size: .9rem; color: var(--muted); font-weight: 600; min-height: 1.3em; }
+  .nav { display: flex; justify-content: center; margin-top: 10px; }
+
+  /* résultat */
+  .done { background: var(--court); color: var(--court-ink); border-radius: 18px; padding: 28px 24px; text-align: center; }
+  .done h2 { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 4px; }
+  .done .score { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-size: 3rem; font-weight: 700; margin: 2px 0 8px; color: var(--ball); }
+  .done p { margin: 0 0 6px; }
+  .revoir { margin-top: 12px; text-align: left; }
+  .revoir .btn { width: 100%; margin-top: 8px; background: transparent; color: var(--court-ink); border-color: var(--line); text-align: left; }
+  .done .btn.main { width: 100%; background: var(--ball); color: var(--ball-ink); border-color: var(--ball); margin-top: 10px; }
+  .done .btn.sec { width: 100%; background: transparent; color: var(--court-ink); border-color: var(--line); margin-top: 10px; }
+
+  .art { margin-top: 4px; }
+  .art svg { display: block; width: 100%; max-width: 170px; margin: 0 auto; border-radius: 6px; }
+  .goal { font-size: .85rem; font-weight: 700; color: var(--muted); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .card, .fill { transition: none; } }
+  @media (max-width: 360px) { .q { font-size: 1.15rem; } .a { font-size: 1.5rem; } .face { padding: 26px 22px; } }
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+
+<script>
+/* =====================================================================
+   CONTENU : pour modifier ou ajouter du texte, c'est ici (THEMES).
+   Chaque thème a : title, intro, points (la leçon), retenir,
+   cards (flash cards en fin de thème) et quiz (cartes en plus pour le quiz final).
+   Une carte peut avoir img: {x, d, ...} pour afficher le terrain entier avec les joueurs et la balle
+   (x = position de la balle en mètres depuis le couloir gauche, d = distance de la balle au filet,
+   far: true si la balle tombe dans le demi-terrain du haut, srv: "droite" ou "gauche" pour un service,
+   hl / ol = noms des deux joueurs, dbl: true pour un double).
+   ===================================================================== */
+const THEMES = [
+/* 1 */
+{
+  title: "Le comptage du score",
+  intro: "Dans les jeux, dans les jeux décisifs et au super jeu décisif.",
+  points: [
+    "On compte **0, 15, 30, 40**, puis jeu. Il faut gagner **4 points** pour gagner le jeu.",
+    "Le serveur annonce son score en premier : « 30/15 » veut dire 30 pour le serveur et 15 pour le relanceur.",
+    "À 40 partout (**40A**), il n'y a pas d'avantage : un seul point décide, c'est le **point décisif**. Le **relanceur** choisit le côté.",
+    "Dans un **jeu décisif** (tie-break), on compte **1, 2, 3…** (pas 15, 30, 40). Le premier à **7 points** gagne, avec 2 points d'écart.",
+    "Au **super jeu décisif** (à la place du 3e set), le premier à **10 points** gagne, avec 2 points d'écart."
+  ],
+  retenir: "4 points = un jeu. 40A : un seul point décide. Jeu décisif : 7 points. Super jeu décisif : 10 points.",
+  cards: [
+    { q: "Je sers. Le score est 0/0. Je gagne le point. Quel est le score ?", a: "15/0" },
+    { q: "Je sers. Le score est 30/15. Je perds le point. Quel est le score ?", a: "30/30", n: "On dit « 30 partout »." },
+    { q: "Je sers. Le score est 40/0. Je gagne le point. Que se passe-t-il ?", a: "Je gagne le jeu !", n: "Il faut 4 points pour gagner un jeu." },
+    { q: "Je reçois le service. Le serveur mène 40/30. Je gagne le point. Quel est le score ?", a: "40A, le point décisif.", n: "Le prochain point décide du jeu." },
+    { q: "Le score est 40A. Je gagne le point. Que se passe-t-il ?", a: "Je gagne le jeu !", n: "C'est le point décisif : pas d'avantage." },
+    { q: "Dans un jeu décisif, comment compte-t-on les points ?", a: "1, 2, 3, 4... (pas 15, 30, 40)", n: "Le premier à 7 points gagne, avec 2 points d'écart." }
+  ],
+  quiz: [
+    { q: "Je sers. Le score est 15/40. Je gagne le point. Quel est le score ?", a: "30/40" },
+    { q: "Je reçois le service. Le score est 0/40 (0 pour le serveur, 40 pour moi). Je gagne le point. Que se passe-t-il ?", a: "Je gagne le jeu !", n: "J'ai pris le service de l'adversaire : c'est un « break »." },
+    { q: "Je sers. Le score est 30/30. Je gagne le point. Quel est le score ?", a: "40/30" },
+    { q: "Je sers. Le score est 40A. Je perds le point. Que se passe-t-il ?", a: "Mon adversaire gagne le jeu.", n: "C'est le point décisif." },
+    { q: "Quel score annonce-t-on en premier ?", a: "Celui du serveur.", n: "Exemple : le serveur a 15 et le relanceur 30 → « 15/30 »." },
+    { q: "Jeu décisif : le score est 6-6. Comment gagner ?", a: "Gagner 2 points de suite.", n: "On continue : 8-6, 9-7... toujours 2 points d'écart." },
+    { q: "Super jeu décisif : je mène 10-8. Que se passe-t-il ?", a: "Je gagne le match !" },
+    { q: "Super jeu décisif : le score est 10-9. Le match est-il fini ?", a: "Non", n: "Il faut 2 points d'écart : 11-9, 12-10..." }
+  ]
+},
+/* 2 */
+{
+  title: "Les formats de match",
+  intro: "Des sets à 3, 4 ou 5 jeux : le format change selon la compétition.",
+  points: [
+    "Un set se joue en **3, 4 ou 5 jeux** chez les jeunes (6 jeux dans les formats plus grands). Le format dépend de la compétition : on te l'annonce avant la partie.",
+    "Pour gagner un set, il faut gagner le nombre de jeux du format avec **2 jeux d'écart**. Exemple : set à 4 jeux → on gagne 4-2.",
+    "Quand le score arrive à **un jeu de moins partout**, on joue un **jeu décisif** : à **2-2** pour un set à 3 jeux, à **3-3** pour 4 jeux, à **4-4** pour 5 jeux. (Pour un set à 6 jeux, c'est à 6-6.)",
+    "Le match se joue en **2 sets gagnants**. Si chacun a gagné un set, on joue un **super jeu décisif** à 10 points à la place du 3e set.",
+    "Chez les jeunes, on joue avec le **point décisif** à 40A."
+  ],
+  retenir: "Jeu décisif à un jeu de moins partout (2-2, 3-3, 4-4). 1 set partout : super jeu décisif à 10 points.",
+  cards: [
+    { q: "Combien de jeux faut-il gagner pour gagner un set ?", a: "Ça dépend du format : 3, 4 ou 5 jeux chez les jeunes.", n: "On te l'annonce avant la partie. Il faut aussi 2 jeux d'écart." },
+    { q: "Set à 3 jeux : à quel score joue-t-on le jeu décisif ?", a: "À 2-2." },
+    { q: "Set à 4 jeux : à quel score joue-t-on le jeu décisif ?", a: "À 3-3." },
+    { q: "Set à 5 jeux : à quel score joue-t-on le jeu décisif ?", a: "À 4-4." },
+    { q: "Chacun a gagné 1 set. Que joue-t-on pour le 3e set ?", a: "Un super jeu décisif à 10 points.", n: "Il remplace le 3e set." },
+    { q: "Combien de sets faut-il gagner pour gagner le match ?", a: "2 sets", n: "Ou 1 set et le super jeu décisif." }
+  ],
+  quiz: [
+    { q: "Set à 4 jeux : le score est 4-2. Le set est-il gagné ?", a: "Oui", n: "4 jeux et 2 jeux d'écart." },
+    { q: "Set à 5 jeux : le score est 5-3. Le set est-il gagné ?", a: "Oui", n: "5 jeux et 2 jeux d'écart." },
+    { q: "Set à 4 jeux : le score est 3-3. Que fait-on ?", a: "On joue un jeu décisif." },
+    { q: "Set à 3 jeux : le score est 3-1. Le set est-il gagné ?", a: "Oui", n: "3 jeux et 2 jeux d'écart." },
+    { q: "Chez les jeunes, joue-t-on avec ou sans point décisif ?", a: "Avec le point décisif à 40A." },
+    { q: "Qui t'annonce le format du match ?", a: "On te l'annonce avant la partie.", n: "Le format dépend de la compétition." }
+  ]
+},
+/* 3 */
+{
+  title: "Balles bonnes et balles fautes",
+  intro: "Au service et dans le jeu : savoir juger une balle.",
+  points: [
+    "Une balle qui **touche la ligne** est **bonne**. Une balle **entièrement dehors** est **faute**.",
+    "**Au service**, la balle doit tomber dans le **carré de service en diagonale**, sans dépasser la ligne de service. Le **couloir** est faute.",
+    "**Dans le jeu, en simple**, le **couloir** est hors du terrain : la balle qui y tombe est faute.",
+    "Au service, si la balle touche le filet et retombe dans le bon carré, c'est un **let** : on rejoue le service.",
+    "**Pendant l'échange**, une balle qui touche le filet et passe de l'autre côté est **bonne** : il n'y a pas de let, le jeu continue.",
+    "Sans arbitre, tu juges les balles de ton côté du filet. **En cas de doute, la balle est bonne.**"
+  ],
+  retenir: "Sur la ligne = bonne. Dehors = faute. Un doute ? Balle bonne.",
+  cards: [
+    { q: "Mon adversaire sert de sa droite. Balle bonne ou faute ?", img: { x: 7.6, d: 4.0, srv: "droite" }, a: "Bonne", n: "Elle tombe dans mon carré de droite, en diagonale de lui." },
+    { q: "Mon adversaire sert de sa droite. Balle bonne ou faute ?", img: { x: 3.2, d: 4.2, srv: "droite" }, a: "Faute", n: "Elle tombe dans le carré de gauche : ce n'est pas le bon carré." },
+    { q: "Mon adversaire sert de sa gauche. Balle bonne ou faute ?", img: { x: 3.0, d: 7.6, srv: "gauche" }, a: "Faute", n: "Elle tombe derrière la ligne de service : elle est trop longue." },
+    { q: "Je viens de frapper un coup droit, en simple. Balle bonne ou faute ?", img: { x: 0.685, d: 8.0, far: true, hl: "Moi", ol: "Adversaire" }, a: "Faute", n: "Elle tombe dans le couloir. En simple, le couloir est hors du terrain." },
+    { q: "Je viens de frapper un coup droit, en simple. Balle bonne ou faute ?", img: { x: 1.22, d: 8.2, far: true, hl: "Moi", ol: "Adversaire" }, a: "Bonne", n: "Elle touche la ligne de côté. Une balle qui touche la ligne est bonne." },
+    { q: "Je viens de frapper un coup droit, en simple. Balle bonne ou faute ?", img: { x: 5.0, d: 12.835, far: true, hl: "Moi", ol: "Adversaire" }, a: "Faute", n: "Elle tombe derrière la ligne de fond." }
+  ],
+  quiz: [
+    { q: "Mon adversaire sert de sa gauche. Balle bonne ou faute ?", img: { x: 0.685, d: 3.5, srv: "gauche" }, a: "Faute", n: "Elle tombe dans le couloir. Au service, le couloir est faute." },
+    { q: "Mon adversaire frappe un coup droit, en simple. Sa balle tombe là. Bonne ou faute ?", img: { x: 4.8, d: 9.0, hl: "Adversaire", ol: "Moi" }, a: "Bonne", n: "Elle tombe bien dans le terrain." },
+    { q: "Je viens de frapper un coup droit. Balle bonne ou faute ?", img: { x: 6.0, d: 11.985, far: true, hl: "Moi", ol: "Adversaire" }, a: "Bonne", n: "Elle touche la ligne de fond. Une balle qui touche la ligne est bonne." },
+    { q: "Je suis sans arbitre et je ne suis pas sûr que la balle de mon adversaire soit faute. Que fais-je ?", a: "Je la considère comme bonne.", n: "En cas de doute, la balle est bonne." },
+    { q: "Au service, la balle touche le filet puis retombe dans le bon carré. Que se passe-t-il ?", a: "C'est un let : on rejoue le service." },
+    { q: "Une balle touche la ligne. Est-elle bonne ou faute ?", a: "Bonne" },
+    { q: "Pendant l'échange, ma balle touche le filet et passe de l'autre côté. Bonne ou faute ?", a: "Bonne : le jeu continue.", n: "Dans l'échange, ce n'est pas un let." },
+    { q: "Au service, la balle touche le filet et tombe hors du carré. Que se passe-t-il ?", a: "C'est une faute.", n: "Ce n'est pas un let : la balle n'est pas tombée dans le bon carré." }
+  ]
+},
+/* 4 */
+{
+  title: "Le placement selon le score",
+  intro: "Où se placer pour servir et pour recevoir, selon le score.",
+  points: [
+    "Un jeu commence toujours **à droite**.",
+    "Compte les points déjà joués : 15 = 1 point, 30 = 2 points, 40 = 3 points. Total **pair** (0, 2, 4…) → **droite**. Total **impair** (1, 3, 5…) → **gauche**.",
+    "Au point décisif (40A), le **relanceur** choisit le côté.",
+    "Après une faute, la 2e balle se joue du **même côté**.",
+    "Au retour, place-toi **en diagonale** du serveur : s'il sert de sa droite, tu te places à ta droite.",
+    "Service très rapide : **recule**. Deuxième balle lente : **avance** d'un pas ou deux.",
+    "En jeu décisif : premier point à droite, puis chacun sert 2 points de suite en commençant à gauche."
+  ],
+  retenir: "Points joués pairs → droite. Impairs → gauche. Au retour : en diagonale.",
+  cards: [
+    { q: "Je sers. Le score est 0/0. De quel côté je sers ?", a: "À droite", n: "On commence toujours un jeu à droite." },
+    { q: "Je sers. Le score est 15/0. De quel côté je sers ?", a: "À gauche", n: "1 point joué (impair) → gauche." },
+    { q: "Je sers. Le score est 30/15. De quel côté je sers ?", a: "À gauche", n: "2 + 1 = 3 points joués (impair) → gauche." },
+    { q: "Je sers. Le score est 40/15. De quel côté je sers ?", a: "À droite", n: "3 + 1 = 4 points joués (pair) → droite." },
+    { q: "Je suis au service. Le score est 30/15. Je gagne le point. Quel sera le score et où dois-je servir au prochain point ?", a: "40/15. Je sers à droite.", n: "3 + 1 = 4 points joués (pair) → droite." },
+    { q: "Mon adversaire sert de sa droite. Où dois-je me placer pour recevoir ?", a: "À ma droite, en diagonale de lui.", n: "Le service est toujours en croisé." }
+  ],
+  quiz: [
+    { q: "Je sers. Le score est 30/30. De quel côté je sers ?", a: "À droite", n: "2 + 2 = 4 points joués (pair) → droite." },
+    { q: "Je sers. Le score est 40/30. De quel côté je sers ?", a: "À gauche", n: "3 + 2 = 5 points joués (impair) → gauche." },
+    { q: "Je sers. Le score est 15/15. De quel côté je sers ?", a: "À droite", n: "2 points joués (pair) → droite." },
+    { q: "Ma première balle est faute. De quel côté je sers ma deuxième balle ?", a: "Du même côté" },
+    { q: "Je viens de gagner mon jeu de service. Qui sert au jeu suivant, et de quel côté ?", a: "Mon adversaire sert, à droite." },
+    { q: "Je suis au service. Le score est 15/30. Je gagne le point. Score et côté du prochain service ?", a: "30/30. Je sers à droite." },
+    { q: "Je suis au service. Le score est 30/30. Je perds le point. Score et côté du prochain service ?", a: "30/40. Je sers à gauche.", n: "2 + 3 = 5 points joués (impair) → gauche." },
+    { q: "Je sers. Le score est 40A (point décisif). Qui choisit le côté où je sers ?", a: "Le relanceur choisit : droite ou gauche." },
+    { q: "Jeu décisif : de quel côté sert-on le premier point ?", a: "À droite", n: "Ensuite chacun sert 2 points de suite, en commençant à gauche." },
+    { q: "Mon adversaire sert très fort. Que fais-je ?", a: "Je recule un peu derrière la ligne de fond." },
+    { q: "Mon adversaire sert une deuxième balle, plus lente. Que fais-je ?", a: "J'avance d'un pas ou deux." }
+  ]
+},
+/* 5 */
+{
+  title: "Changements de côté et hydratation",
+  intro: "Quand on change de côté, et pourquoi on en profite pour boire.",
+  points: [
+    "On change après le **1er, 3e, 5e jeu**… (les jeux impairs).",
+    "Astuce : additionne les jeux des deux joueurs. **Total impair → on change.** Total pair → on reste.",
+    "On ne change **jamais** de côté en plein jeu.",
+    "Fin de set : si le total de jeux est impair (par exemple 4-1), on change tout de suite. S'il est pair (par exemple 4-2), on change après le 1er jeu du set suivant.",
+    "En jeu décisif et en super jeu décisif : on change **tous les 6 points**.",
+    "Aux changements de côté, **bois** de l'eau, par petites gorgées, régulièrement et **avant** d'avoir soif.",
+    "Prépare ta gourde avant le match et garde-la à portée de main."
+  ],
+  retenir: "Total de jeux impair → on change de côté, et on boit.",
+  cards: [
+    { q: "Après quels jeux change-t-on de côté ?", a: "Après le 1er, le 3e, le 5e, le 7e... (les jeux impairs).", n: "Le total de jeux est impair → on change." },
+    { q: "Le score en jeux est 1-0. Change-t-on de côté ?", a: "Oui", n: "1 jeu joué (impair)." },
+    { q: "Le score en jeux est 4-2. Change-t-on de côté ?", a: "Non", n: "6 jeux joués (pair)." },
+    { q: "Dans un jeu décisif, quand change-t-on de côté ?", a: "Tous les 6 points.", n: "Quand le total des points est 6, 12, 18..." },
+    { q: "À quel moment peux-tu boire pendant un match ?", a: "Aux changements de côté.", n: "Et entre les sets. Pas pendant un jeu." },
+    { q: "Que dois-tu boire pendant un match ?", a: "De l'eau, par petites gorgées.", n: "Bois régulièrement, avant d'avoir soif." }
+  ],
+  quiz: [
+    { q: "Le score en jeux est 1-1. Change-t-on de côté ?", a: "Non", n: "2 jeux joués (pair)." },
+    { q: "Le score en jeux est 4-1. Change-t-on de côté ?", a: "Oui", n: "5 jeux joués (impair)." },
+    { q: "Le score en jeux est 2-1. Change-t-on de côté ?", a: "Oui", n: "3 jeux joués (impair)." },
+    { q: "Le score en jeux est 3-3. Change-t-on de côté ?", a: "Non", n: "6 jeux joués (pair)." },
+    { q: "Pendant un jeu, change-t-on de côté ?", a: "Non, jamais", n: "Sauf pendant le jeu décisif." },
+    { q: "Un set se termine sur 4-1. Change-t-on de côté ?", a: "Oui", n: "5 jeux joués (impair)." },
+    { q: "Un set se termine sur 4-2. Change-t-on de côté ?", a: "Non, pas tout de suite.", n: "6 jeux (pair). On change après le 1er jeu du set suivant." },
+    { q: "Le jeu décisif d'un set à 4 jeux est fini (le set se termine 4-3). Change-t-on de côté ?", a: "Oui", n: "7 jeux au total : c'est impair." },
+    { q: "Jeu décisif : le score est 3-3. Change-t-on de côté ?", a: "Oui", n: "3 + 3 = 6 points joués." },
+    { q: "Super jeu décisif : le score est 5-3. Change-t-on de côté ?", a: "Non, pas encore.", n: "8 points joués. On change à 6, puis à 12." },
+    { q: "Super jeu décisif : le score est 7-5. Change-t-on de côté ?", a: "Oui", n: "7 + 5 = 12 points joués." },
+    { q: "Pourquoi faut-il boire avant d'avoir soif ?", a: "Quand on a soif, le corps manque déjà d'eau." }
+  ]
+},
+/* 6 */
+{
+  title: "Le tirage au sort",
+  intro: "Qui choisit quoi avant le match.",
+  points: [
+    "Le tirage au sort se fait **avant le début de l'échauffement**.",
+    "Si tu le gagnes, tu as **3 choix** :",
+    "**Servir ou relancer** : ton adversaire choisit alors le côté.",
+    "**Choisir un côté** : ton adversaire choisit alors de servir ou de relancer.",
+    "**Laisser ton adversaire choisir**.",
+    "Si tu le perds, tu choisis **ce que le vainqueur n'a pas choisi**."
+  ],
+  retenir: "Avant l'échauffement. Le gagnant a 3 choix. Le perdant choisit ce qui reste.",
+  cards: [
+    { q: "Quand fait-on le tirage au sort ?", a: "Avant le début de l'échauffement." },
+    { q: "J'ai gagné le tirage au sort. Quels sont mes choix ?", a: "Servir ou relancer, choisir un côté, ou laisser mon adversaire choisir." },
+    { q: "Je gagne le tirage au sort et je choisis de servir. Qui choisit le côté ?", a: "Mon adversaire." },
+    { q: "Je gagne le tirage au sort et je choisis un côté. Qui choisit de servir ou de relancer ?", a: "Mon adversaire." },
+    { q: "J'ai perdu le tirage au sort. Que choisis-je ?", a: "Ce que le vainqueur n'a pas choisi.", n: "S'il a choisi de servir, je choisis le côté. S'il a choisi le côté, je choisis de servir ou de relancer." }
+  ],
+  quiz: [
+    { q: "Le tirage au sort a lieu avant ou après l'échauffement ?", a: "Avant." },
+    { q: "Combien de choix a le vainqueur du tirage au sort ?", a: "3 choix" },
+    { q: "Le vainqueur du tirage peut-il choisir à la fois de servir et le côté ?", a: "Non : s'il choisit l'un, c'est l'adversaire qui choisit l'autre." }
+  ]
+},
+/* 7 */
+{
+  title: "Fautes de pieds et service",
+  intro: "Où mettre ses pieds et où se placer pour servir.",
+  points: [
+    "Avant de frapper la balle au service, tes **pieds restent derrière la ligne de fond**, sans la toucher.",
+    "Tu te places du **bon côté de la marque du milieu** : à droite de la marque pour servir à droite, à gauche pour servir à gauche.",
+    "Tu ne dois pas **marcher ni courir** pendant le service. De petits mouvements des pieds sont permis.",
+    "Tu peux sauter pour frapper. C'est **après avoir frappé** la balle que tu peux retomber dans le terrain.",
+    "Si tes pieds touchent la ligne ou le terrain **avant** la frappe, c'est une **faute de pied** : une **faute de service**.",
+    "Pour servir, place-toi **derrière la ligne de fond, près de la marque du milieu**, du côté où tu sers."
+  ],
+  retenir: "Pieds derrière la ligne jusqu'à la frappe. Faute de pied = faute de service.",
+  cards: [
+    { q: "Où doivent être tes pieds avant de frapper la balle au service ?", a: "Derrière la ligne de fond, sans la toucher." },
+    { q: "Un joueur pose le pied sur la ligne de fond avant de frapper son service. Que se passe-t-il ?", a: "C'est une faute de pied, donc une faute de service." },
+    { q: "Un joueur fait une faute de pied sur sa deuxième balle. Que se passe-t-il ?", a: "C'est une double faute : le point est pour son adversaire." },
+    { q: "Peut-on marcher ou courir pendant le service ?", a: "Non", n: "De petits mouvements des pieds sont permis." },
+    { q: "Quand peut-on retomber dans le terrain après un service sauté ?", a: "Après avoir frappé la balle." },
+    { q: "Je sers. Où je me place ?", a: "Derrière la ligne de fond, près de la marque du milieu.", n: "Du bon côté de la marque, selon le côté où je sers." }
+  ],
+  quiz: [
+    { q: "Je sers de la droite. De quel côté de la marque du milieu je me place ?", a: "À droite de la marque du milieu." },
+    { q: "Je sers de la gauche. De quel côté de la marque du milieu je me place ?", a: "À gauche de la marque du milieu." },
+    { q: "Je saute pour servir et je retombe dans le terrain après avoir frappé la balle. Y a-t-il faute de pied ?", a: "Non", n: "Les pieds ne doivent pas toucher la ligne ou le terrain avant la frappe." },
+    { q: "Je touche la ligne de fond avec mon pied avant de frapper la balle. Qu'est-ce que c'est ?", a: "Une faute de pied." },
+    { q: "Une faute de pied compte comme quoi ?", a: "Une faute de service." }
+  ]
+},
+/* 8 */
+{
+  title: "Spécificité du double",
+  intro: "Ce qui change quand on joue à deux contre deux.",
+  points: [
+    "Dans l'échange, les **couloirs sont bons** : le terrain est plus large.",
+    "Au service, les carrés de service sont **les mêmes qu'en simple** : le couloir reste **faute**.",
+    "Au début de chaque set, chaque équipe choisit **qui sert en premier**. L'ordre de service ne change plus pendant le set.",
+    "Les deux partenaires **servent à tour de rôle**, un jeu sur deux de leur équipe.",
+    "À la réception, chaque joueur reçoit toujours du **même côté** pendant le set.",
+    "Dans l'échange, **n'importe lequel** des deux partenaires peut jouer la balle.",
+    "Le partenaire du serveur se place **où il veut** de son côté, souvent près du filet."
+  ],
+  retenir: "Couloirs bons dans l'échange, faute au service. Ordre de service fixe pendant le set.",
+  cards: [
+    { q: "On joue un double. La balle de mon adversaire tombe là, pendant l'échange. Bonne ou faute ?", img: { x: 0.685, d: 8.0, hl: "Adversaire", ol: "Moi", dbl: true }, a: "Bonne", n: "En double, le couloir fait partie du terrain pendant l'échange." },
+    { q: "On joue un double. Mon adversaire sert de sa gauche. La balle tombe là. Bonne ou faute ?", img: { x: 0.685, d: 3.5, srv: "gauche", dbl: true }, a: "Faute", n: "Au service, le couloir est faute, même en double." },
+    { q: "Qui choisit l'ordre de service dans une équipe de double ?", a: "L'équipe, au début de chaque set.", n: "Il ne change plus pendant le set." },
+    { q: "Dans une équipe de double, qui sert ?", a: "Les deux partenaires, à tour de rôle." },
+    { q: "Je reçois à droite au premier jeu d'un set de double. De quel côté je reçois pendant le reste du set ?", a: "Toujours à droite." },
+    { q: "Dans l'échange, les deux partenaires doivent-ils jouer la balle à tour de rôle ?", a: "Non, n'importe lequel des deux peut la jouer." }
+  ],
+  quiz: [
+    { q: "Où peut se placer le partenaire du serveur ?", a: "Où il veut de son côté du filet.", n: "Souvent près du filet." },
+    { q: "Peut-on changer l'ordre de service d'un set à l'autre ?", a: "Oui, au début de chaque set." },
+    { q: "Les carrés de service sont-ils plus larges en double ?", a: "Non, ce sont les mêmes qu'en simple." },
+    { q: "L'équipe A sert au 1er jeu avec le joueur A1. Qui sert au 3e jeu pour cette équipe ?", a: "Son partenaire, A2.", n: "Jeu 1 : A1. Jeu 2 : équipe B. Jeu 3 : A2." },
+    { q: "En double, le couloir est-il bon ou faute dans l'échange ?", a: "Bon" }
+  ]
+},
+/* 9 */
+{
+  title: "Le classement au tennis",
+  intro: "Comment on monte de classement avec ses victoires.",
+  points: [
+    "Le classement se calcule sur les **12 derniers mois** de matchs **homologués**, en simple ou en double.",
+    "**4 victoires** → classement **40/2**.",
+    "**8 victoires** → classement **40/1**. (Les victoires par forfait ne comptent pas.)",
+    "**12 victoires** → classement **40**.",
+    "Ensuite, on monte en gagnant des **points** : **30/5, 30/4, 30/3**…",
+    "Une victoire contre un joueur mieux classé rapporte **plus de points**."
+  ],
+  retenir: "4 victoires = 40/2. 8 = 40/1. 12 = 40. Ensuite : des points.",
+  source: "D'après les règles de la FFT en vigueur depuis juillet 2025. À vérifier à chaque saison.",
+  cards: [
+    { q: "Combien de victoires faut-il pour être classé 40/2 ?", a: "4 victoires", n: "Sur les 12 derniers mois, en simple ou en double (matchs homologués)." },
+    { q: "Combien de victoires faut-il pour être classé 40/1 ?", a: "8 victoires", n: "Les victoires par forfait ne comptent pas." },
+    { q: "Combien de victoires faut-il pour être classé 40 ?", a: "12 victoires", n: "Il existe aussi d'autres façons d'y arriver, par exemple battre un joueur classé 40." },
+    { q: "Après 40, comment monte-t-on à 30/5, 30/4, 30/3... ?", a: "En gagnant des points avec ses victoires.", n: "Plus l'adversaire est bien classé, plus la victoire rapporte de points." },
+    { q: "Sur quelle durée compte-t-on les victoires ?", a: "Sur les 12 derniers mois." }
+  ],
+  quiz: [
+    { q: "Un match de double compte-t-il pour devenir 40/2 ?", a: "Oui", n: "Simple ou double, du moment que le match est homologué." },
+    { q: "Une victoire par forfait (w.o.) compte-t-elle pour passer 40/1 ?", a: "Non" },
+    { q: "Quel est le premier classement ?", a: "40/2" },
+    { q: "Quel classement vient juste après 40/1 ?", a: "40" },
+    { q: "Quel classement vient juste après 40 ?", a: "30/5" }
+  ]
+}
+];
+const FINAL_N = 25;
+
+/* ---------------- Terrain entier avec joueurs et balle (vue de dessus) ---------------- */
+const CS = 14, CMX = 1.3, CMY = 2.0, CW = 10.97, CL = 11.885, CSL = 6.4, CAL = 1.37, CR = 6;
+function court(img, label) {
+  const w = (CW + 2 * CMX) * CS, h = (2 * CL + 2 * CMY) * CS;
+  const X = v => (CMX + v) * CS, Y = v => (CMY + v) * CS;
+  const ln = (a, b, c, d) => '<line x1="' + X(a) + '" y1="' + Y(b) + '" x2="' + X(c) + '" y2="' + Y(d) + '"/>';
+  const bx = img.x, by = img.far ? CL - img.d : CL + img.d;
+  const hitTop = img.srv ? true : !img.far;
+  const hl = img.srv ? "Serveur" : (img.hl || "Frappeur"), ol = img.srv ? "Relanceur" : (img.ol || "Adversaire");
+  const topY = -0.8, botY = 2 * CL + 0.8;
+  const hy = hitTop ? topY : botY, oy = hitTop ? botY : topY;
+  const hx = img.srv ? CW / 2 + (img.srv === "droite" ? -1.4 : 1.4) : CW / 2;
+  const ox = img.srv ? CW / 2 : (bx < CW / 2 ? CW / 2 + 1.0 : CW / 2 - 1.0);
+  const px = v => Math.abs(v - CW / 2) < 0.5 ? CW / 2 + 2.5 : CW - v;
+  const pl = (x, y, fill, stroke, r, text, dir) => {
+    let s = '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5"/>';
+    if (text) {
+      const right = dir ? dir === "r" : X(x) <= w / 2 + 1;
+      s += '<text x="' + (X(x) + (right ? 13 : -13)) + '" y="' + (Y(y) + 4) + '" font-size="11" fill="#ffffff" text-anchor="' + (right ? "start" : "end") + '">' + esc(text) + '</text>';
+    }
+    return s;
+  };
+  let s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img"><title>' + esc(label) + '</title>';
+  s += '<rect x="0" y="0" width="' + w + '" height="' + h + '" fill="#3f8a55"/>';
+  s += '<rect x="' + X(0) + '" y="' + Y(0) + '" width="' + (CW * CS) + '" height="' + (2 * CL * CS) + '" fill="#2f6db5"/>';
+  s += '<g stroke="#ffffff" stroke-width="2.2" fill="none" stroke-linecap="square">';
+  s += ln(0, 0, CW, 0) + ln(0, 2 * CL, CW, 2 * CL) + ln(0, 0, 0, 2 * CL) + ln(CW, 0, CW, 2 * CL) + ln(CAL, 0, CAL, 2 * CL) + ln(CW - CAL, 0, CW - CAL, 2 * CL);
+  s += ln(CAL, CL - CSL, CW - CAL, CL - CSL) + ln(CAL, CL + CSL, CW - CAL, CL + CSL) + ln(CW / 2, CL - CSL, CW / 2, CL + CSL);
+  s += ln(CW / 2, 0, CW / 2, 0.45) + ln(CW / 2, 2 * CL, CW / 2, 2 * CL - 0.45) + '</g>';
+  s += '<rect x="' + (X(0) - 6) + '" y="' + (Y(CL) - 2.5) + '" width="' + (CW * CS + 12) + '" height="5" fill="#f2f2f2" stroke="#444444" stroke-width="0.5"/>';
+  s += '<line x1="' + X(hx) + '" y1="' + Y(hy) + '" x2="' + X(bx) + '" y2="' + Y(by) + '" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85"/>';
+  if (img.dbl) {
+    s += pl(px(hx), hitTop ? CL - 1.8 : CL + 1.8, "#ff7a1a", "#ffffff", 6, "");
+    s += pl(px(ox), hitTop ? CL + 1.8 : CL - 1.8, "#f2f2f2", "#444444", 6, "");
+  }
+  s += pl(hx, hy, "#ff7a1a", "#ffffff", 7, hl);
+  s += pl(ox, oy, "#f2f2f2", "#444444", 7, ol, img.srv ? "" : (bx < CW / 2 ? "r" : "l"));
+  s += '<circle cx="' + X(bx) + '" cy="' + Y(by) + '" r="' + CR + '" fill="#d9e83f" stroke="#6f7d0c" stroke-width="1"/></svg>';
+  return s;
+}
+
+/* ---------------- Progression (gardée sur l'appareil) ---------------- */
+const KEY = "formation-tcb-competition-v1";
+let P = { done: {} };
+function loadP() { try { const d = JSON.parse(localStorage.getItem(KEY) || "null"); if (d && d.done) P = d; } catch (e) {} }
+function saveP() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} }
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function fmt(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+function shuffled(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+let V = { view: "home" };
+
+function dots(active) {
+  let h = '<div class="dots" aria-hidden="true">';
+  for (let i = 0; i <= THEMES.length; i++) {
+    const key = i === THEMES.length ? "final" : "t" + i;
+    h += '<span class="dot' + (i === active ? " on" : P.done[key] ? " done" : "") + '"></span>';
+  }
+  return h + '</div>';
+}
+
+function homeHTML() {
+  let h = '<a class="homelink" href="../">← Accueil</a>' +
+    '<h1>Se préparer à la compétition</h1>' +
+    '<p class="sub">9 thèmes à découvrir. Après chaque thème, des flash cards pour vérifier ce que tu as retenu. Puis un quiz final.</p><ol class="path">';
+  THEMES.forEach((t, i) => {
+    const d = P.done["t" + i];
+    h += '<li><button class="step" data-act="theme" data-i="' + i + '" type="button"><span class="num">' + (i + 1) + '</span>' +
+      '<span class="txt"><b>' + esc(t.title) + '</b><small>' + esc(t.intro) + '</small></span>' +
+      (d ? '<span class="st">✓ ' + d.k + '/' + d.n + '</span>' : "") + '</button></li>';
+  });
+  const f = P.done.final;
+  h += '<li><button class="step final" data-act="final" type="button"><span class="num">★</span>' +
+    '<span class="txt"><b>Quiz final</b><small>' + FINAL_N + ' flash cards qui reprennent les 9 thèmes</small></span>' +
+    (f ? '<span class="st">✓ ' + f.k + '/' + f.n + '</span>' : "") + '</button></li></ol>';
+  return h;
+}
+
+function lessonHTML() {
+  const i = V.ti, t = THEMES[i];
+  return '<div class="topbar"><button class="link" data-act="home" type="button">← Parcours</button>' +
+    '<span class="lbl">Thème ' + (i + 1) + ' sur ' + THEMES.length + '</span></div>' + dots(i) +
+    '<h1>' + esc(t.title) + '</h1><p class="sub">' + esc(t.intro) + '</p>' +
+    '<ul class="lesson">' + t.points.map(p => '<li>' + fmt(p) + '</li>').join("") + '</ul>' +
+    '<div class="retenir"><span>À retenir</span>' + esc(t.retenir) + '</div>' +
+    (t.source ? '<p class="goal">' + esc(t.source) + '</p>' : "") +
+    '<button class="btn big" data-act="cards" type="button">Passer aux flash cards (' + t.cards.length + ')</button>';
+}
+
+function deckHTML() {
+  const total = V.cards.length, k = V.cards[V.idx];
+  const label = V.kind === "final" ? "Quiz final" : "Flash cards · Thème " + (V.ti + 1);
+  const tag = V.kind === "final" ? "Thème " + (k.t + 1) + " · " + THEMES[k.t].title : THEMES[V.ti].title;
+  return '<div class="topbar"><button class="link" data-act="home" type="button">← Parcours</button>' +
+    '<span class="lbl">' + esc(label) + '</span></div>' +
+    '<div class="bar"><span>Carte ' + (V.idx + 1) + ' sur ' + total + '</span></div>' +
+    '<div class="track" aria-hidden="true"><div class="fill" style="width:' + (V.idx / total * 100) + '%"></div></div>' +
+    '<div class="scene"><div class="card' + (V.flipped ? " flipped" : "") + '" id="card" role="button" tabindex="0" aria-label="Carte : retourner pour voir la réponse">' +
+      '<div class="face front" aria-hidden="' + V.flipped + '"><span class="cat">' + esc(tag) + '</span><p class="q">' + esc(k.q) + '</p>' +
+        (k.img ? '<div class="art">' + court(k.img, k.q) + '</div>' : "") + '</div>' +
+      '<div class="face back" aria-hidden="' + (!V.flipped) + '"><span class="cat">Réponse</span><p class="a">' + esc(k.a) + '</p>' + (k.n ? '<p class="n">' + esc(k.n) + '</p>' : "") + '</div>' +
+    '</div></div>' +
+    '<p class="hint" id="hint">' + (V.flipped ? "Tu le savais ?" : "Touche la carte pour voir la réponse") + '</p>' +
+    '<div class="actions"><button class="btn retry" id="bRetry" data-act="no" type="button"' + (V.flipped ? "" : " disabled") + '>À revoir</button>' +
+    '<button class="btn ok" id="bOk" data-act="yes" type="button"' + (V.flipped ? "" : " disabled") + '>Je savais</button></div>' +
+    '<div class="nav"><button class="link" data-act="skip" type="button">Passer</button></div>';
+}
+
+function resultHTML() {
+  const n = V.cards.length, k = V.known, miss = V.missed;
+  const msg = k === n ? "Parfait, aucune erreur !" : k / n >= 0.7 ? "Bien joué !" : "Continue, tu progresses !";
+  let h = '<div class="topbar"><button class="link" data-act="home" type="button">← Parcours</button><span class="lbl">' +
+    (V.kind === "final" ? "Quiz final" : "Thème " + (V.ti + 1)) + '</span></div>' +
+    '<div class="done"><h2>' + msg + '</h2><div class="score">' + k + ' / ' + n + '</div>';
+  if (V.kind === "final" && miss.length) {
+    const ts = [...new Set(miss.map(c => c.t))].sort((a, b) => a - b);
+    h += '<div class="revoir"><p>À relire :</p>' + ts.map(i =>
+      '<button class="btn" data-act="theme" data-i="' + i + '" type="button">Thème ' + (i + 1) + ' · ' + esc(THEMES[i].title) + '</button>').join("") + '</div>';
+  }
+  if (miss.length) h += '<button class="btn main" data-act="redo" type="button">Refaire les ' + miss.length + ' cartes à revoir</button>';
+  const cls = miss.length ? "sec" : "main";
+  if (V.kind === "final") {
+    h += '<button class="btn ' + cls + '" data-act="final" type="button">Un nouveau quiz final</button>';
+  } else if (V.ti < THEMES.length - 1) {
+    h += '<button class="btn ' + cls + '" data-act="theme" data-i="' + (V.ti + 1) + '" type="button">Thème suivant : ' + esc(THEMES[V.ti + 1].title) + '</button>';
+  } else {
+    h += '<button class="btn ' + cls + '" data-act="final" type="button">Passer au quiz final</button>';
+  }
+  return h + '<button class="btn sec" data-act="home" type="button">Retour au parcours</button></div>';
+}
+
+function render() {
+  const v = V.view;
+  document.getElementById("app").innerHTML = v === "home" ? homeHTML() : v === "lesson" ? lessonHTML() : v === "deck" ? deckHTML() : resultHTML();
+  window.scrollTo(0, 0);
+}
+
+function allCards() {
+  const out = [];
+  THEMES.forEach((t, ti) => t.cards.concat(t.quiz).forEach(c => out.push(Object.assign({ t: ti }, c))));
+  return out;
+}
+function buildFinal() {
+  const all = allCards(), pick = [], used = new Set();
+  THEMES.forEach((t, ti) => {
+    const pool = all.filter(c => c.t === ti);
+    const c = pool[Math.floor(Math.random() * pool.length)];
+    pick.push(c); used.add(c);
+  });
+  shuffled(all.filter(c => !used.has(c))).slice(0, Math.max(0, FINAL_N - pick.length)).forEach(c => pick.push(c));
+  return shuffled(pick);
+}
+
+function startDeck(kind, ti, cards) {
+  V = { view: "deck", kind, ti, cards, idx: 0, flipped: false, known: 0, missed: [], full: true };
+  render();
+}
+function nextCard(ok) {
+  if (ok) V.known++; else V.missed.push(V.cards[V.idx]);
+  V.idx++; V.flipped = false;
+  if (V.idx >= V.cards.length) {
+    if (V.full) { P.done[V.kind === "final" ? "final" : "t" + V.ti] = { k: V.known, n: V.cards.length }; saveP(); }
+    V.view = "result";
+  }
+  render();
+}
+function flip() {
+  V.flipped = !V.flipped;
+  const c = document.getElementById("card");
+  c.classList.toggle("flipped", V.flipped);
+  c.querySelector(".front").setAttribute("aria-hidden", String(V.flipped));
+  c.querySelector(".back").setAttribute("aria-hidden", String(!V.flipped));
+  document.getElementById("bRetry").disabled = !V.flipped;
+  document.getElementById("bOk").disabled = !V.flipped;
+  document.getElementById("hint").textContent = V.flipped ? "Tu le savais ?" : "Touche la carte pour voir la réponse";
+}
+
+document.addEventListener("click", e => {
+  if (e.target.closest("#card")) { flip(); return; }
+  const t = e.target.closest("[data-act]");
+  if (!t || t.disabled) return;
+  const a = t.dataset.act;
+  if (a === "home") { V = { view: "home" }; render(); }
+  else if (a === "theme") { V = { view: "lesson", ti: +t.dataset.i }; render(); }
+  else if (a === "cards") startDeck("theme", V.ti, THEMES[V.ti].cards.slice());
+  else if (a === "final") startDeck("final", null, buildFinal());
+  else if (a === "yes") nextCard(true);
+  else if (a === "no" || a === "skip") nextCard(false);
+  else if (a === "redo") { V = Object.assign({}, V, { view: "deck", cards: V.missed.slice(), idx: 0, flipped: false, known: 0, missed: [], full: false }); render(); }
+});
+document.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && document.activeElement && document.activeElement.id === "card") { e.preventDefault(); flip(); }
+});
+
+loadP();
+render();
+</script>
+</body>
+</html>
