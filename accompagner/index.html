@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d5c3c">
+<title>Accompagner son enfant dans la compétition · Formation Bouliac Tennis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef2e4; --ink: #11281b; --muted: #4c6354;
+    --court: #1d5c3c; --court-ink: #f6f9ee; --line: rgba(246, 249, 238, 0.9);
+    --ball: #dcf53c; --ball-ink: #11281b;
+    --panel: #ffffff; --border: #c5d1b8; --track: #d3dcc6;
+    --ok: #1d5c3c; --ok-ink: #f6f9ee;
+    --retry: #ffffff; --retry-ink: #11281b;
+    --focus: #e0561b;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1a13; --ink: #eaf2de; --muted: #9db3a3;
+      --court: #17503a; --court-ink: #f6f9ee;
+      --ball: #d4ee38; --ball-ink: #11281b;
+      --panel: #16271d; --border: #2d4636; --track: #2a4033;
+      --ok: #dcf53c; --ok-ink: #11281b;
+      --retry: #16271d; --retry-ink: #eaf2de;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1a13; --ink: #eaf2de; --muted: #9db3a3;
+    --court: #17503a; --court-ink: #f6f9ee;
+    --ball: #d4ee38; --ball-ink: #11281b;
+    --panel: #16271d; --border: #2d4636; --track: #2a4033;
+    --ok: #dcf53c; --ok-ink: #11281b;
+    --retry: #16271d; --retry-ink: #eaf2de;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.45; -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 16px 16px 40px; }
+  h1 { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.85rem; line-height: 1.1; margin: 6px 0 6px; }
+  .sub { margin: 0 0 16px; color: var(--muted); font-size: 1rem; }
+  a.homelink, .link {
+    font: inherit; font-weight: 700; color: var(--muted); background: none; border: 0;
+    padding: 4px 0; cursor: pointer; text-decoration: none;
+  }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .lbl { font-weight: 800; font-size: .85rem; color: var(--muted); }
+
+  /* parcours */
+  .path { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .step {
+    display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+    font: inherit; color: inherit; cursor: pointer;
+    background: var(--panel); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px;
+  }
+  .step .num {
+    flex: none; width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; font-family: "Fredoka", system-ui, sans-serif; font-weight: 600; font-size: 1.15rem;
+    background: var(--court); color: var(--court-ink);
+  }
+  .step.final .num { background: var(--ball); color: var(--ball-ink); }
+  .step .txt { flex: 1; }
+  .step .txt b { display: block; font-size: 1.05rem; }
+  .step .txt small { color: var(--muted); font-size: .88rem; }
+  .step .st { flex: none; font-weight: 800; font-size: .85rem; color: var(--court); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .step .st { color: var(--ball); } }
+  :root[data-theme="dark"] .step .st { color: var(--ball); }
+
+  /* points de progression */
+  .dots { display: flex; gap: 6px; margin: 4px 0 12px; }
+  .dot { flex: 1; height: 6px; border-radius: 99px; background: var(--track); }
+  .dot.done { background: var(--court); }
+  .dot.on { background: var(--ball); outline: 1.5px solid var(--court); }
+
+  /* leçon */
+  .lesson { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 10px; }
+  .lesson li { background: var(--panel); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; }
+  .lesson b { font-weight: 800; }
+  .retenir { background: var(--ball); color: var(--ball-ink); border-radius: 16px; padding: 14px 16px; margin-bottom: 16px; font-weight: 700; }
+  .retenir span { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; opacity: .75; margin-bottom: 2px; }
+
+  /* boutons */
+  .btn {
+    font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer;
+    padding: 13px 10px; border-radius: 14px; border: 2px solid var(--court);
+    background: var(--court); color: var(--court-ink);
+  }
+  .btn.big { width: 100%; padding: 16px; font-size: 1.1rem; }
+  .btn.ok { background: var(--ok); color: var(--ok-ink); border-color: var(--ok); }
+  .btn.retry, .btn.alt { background: var(--retry); color: var(--retry-ink); border-color: var(--border); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .stack { display: grid; gap: 10px; margin-top: 12px; }
+
+  /* flash cards */
+  .bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: .9rem; color: var(--muted); font-weight: 700; }
+  .track { height: 6px; background: var(--track); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+  .fill { height: 100%; width: 0; background: var(--court); transition: width .25s ease; }
+  .scene { perspective: 1200px; }
+  .card {
+    position: relative; display: grid; width: 100%; min-height: 320px; cursor: pointer;
+    transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3,.7,.3,1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    grid-area: 1 / 1; position: relative; height: 100%; min-height: 320px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: 18px; padding: 30px 26px;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  }
+  .front { background: var(--court); color: var(--court-ink); }
+  .front::before { content: ""; position: absolute; inset: 11px; border: 2px solid var(--line); border-radius: 8px; pointer-events: none; }
+  .back { background: var(--ball); color: var(--ball-ink); transform: rotateY(180deg); }
+  .cat { align-self: flex-start; font-weight: 800; font-size: .82rem; padding: 3px 11px; border-radius: 99px; background: rgba(246,249,238,.16); }
+  .back .cat { background: rgba(17,40,27,.12); }
+  .q { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 500; font-size: 1.28rem; line-height: 1.3; margin: 0; }
+  .a { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 700; font-size: 1.7rem; line-height: 1.2; margin: 0; }
+  .n { margin: 0; font-size: 1rem; font-weight: 600; opacity: .85; }
+  .hint { margin: 10px 0 0; text-align: center; font-size: .9rem; color: var(--muted); font-weight: 600; min-height: 1.3em; }
+  .nav { display: flex; justify-content: center; margin-top: 10px; }
+
+  /* résultat */
+  .done { background: var(--court); color: var(--court-ink); border-radius: 18px; padding: 28px 24px; text-align: center; }
+  .done h2 { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 4px; }
+  .done .score { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-size: 3rem; font-weight: 700; margin: 2px 0 8px; color: var(--ball); }
+  .done p { margin: 0 0 6px; }
+  .revoir { margin-top: 12px; text-align: left; }
+  .revoir .btn { width: 100%; margin-top: 8px; background: transparent; color: var(--court-ink); border-color: var(--line); text-align: left; }
+  .done .btn.main { width: 100%; background: var(--ball); color: var(--ball-ink); border-color: var(--ball); margin-top: 10px; }
+  .done .btn.sec { width: 100%; background: transparent; color: var(--court-ink); border-color: var(--line); margin-top: 10px; }
+
+  .art { margin-top: 4px; }
+  .art svg { display: block; width: 100%; max-width: 170px; margin: 0 auto; border-radius: 6px; }
+  .goal { font-size: .85rem; font-weight: 700; color: var(--muted); }
+  :root { --good: #d9f2dd; --bad: #f8d7d3; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --good: #1f4a33; --bad: #5a2622; } }
+  :root[data-theme="dark"] { --good: #1f4a33; --bad: #5a2622; }
+  .lesson li.hd { background: none; border: 0; padding: 8px 2px 0; font-weight: 800; font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .step.soon { opacity: .7; cursor: default; }
+  .opts { display: grid; gap: 10px; margin: 14px 0 10px; }
+  .opt { font: inherit; font-weight: 700; text-align: left; cursor: pointer; width: 100%; padding: 14px; border-radius: 14px;
+         background: var(--panel); color: var(--ink); border: 2px solid var(--border); }
+  .opt.good { background: var(--good); border-color: var(--court); }
+  .opt.bad { background: var(--bad); border-color: #b3261e; }
+  .opt:disabled { cursor: default; }
+  .qbox { background: var(--panel); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; }
+  .qbox .q { color: var(--ink); }
+  .expl { margin: 0 0 10px; font-weight: 600; color: var(--muted); }
+  .errs { text-align: left; margin-top: 12px; display: grid; gap: 8px; }
+  .errs div { background: rgba(246,249,238,.12); border-radius: 12px; padding: 10px 12px; font-size: .92rem; }
+  .errs b { font-weight: 800; }
+  .label { background: var(--ball); color: var(--ball-ink); border-radius: 16px; padding: 16px; margin: 14px 0 6px; text-align: center; }
+  .label .star { font-size: 2rem; line-height: 1; }
+  .label b { display: block; font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.35rem; margin-top: 4px; }
+  .label small { display: block; font-weight: 700; opacity: .8; margin-top: 2px; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .card, .fill { transition: none; } }
+  @media (max-width: 360px) { .q { font-size: 1.15rem; } .a { font-size: 1.5rem; } .face { padding: 26px 22px; } }
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+
+<script>
+/* =====================================================================
+   CONTENU : modifiable ici (LEVELS). Une seule formation : 4 thèmes, flash cards d'entraînement,
+   banque de questions du quiz final (20 questions au hasard, label à 18/20).
+   bank : { t: n° du thème (0 à 3), q, ok: "bonne réponse", ko: ["mauvaises"], n: "explication", img?: {x, d, srv, far, hl, ol} }
+   ===================================================================== */
+const LEVELS = [
+{
+  id: "parents", name: "Accompagner son enfant dans la compétition", sub: "Pour les parents",
+  intro: "Le tennis est un sport individuel : l'entraîneur est très rarement au bord du terrain pendant les matchs. Votre rôle de parent est fondamental.",
+  valid: { n: 20, pass: 18 }, badge: "Label Parent responsable",
+  themes: [
+    {
+      title: "Les règles du jeu",
+      intro: "Comprendre le jeu, pour soutenir sans intervenir.",
+      points: [
+        "## Compter les points",
+        "**15, 30, 40, jeu**. À **40A**, un seul point décide : le **point décisif** (le relanceur choisit le côté).",
+        "Au **jeu décisif**, on compte **1, 2, 3…** : premier à **7 points**, avec 2 points d'écart. Chez les jeunes, un **super jeu décisif à 10 points** remplace le 3e set.",
+        "## Se placer",
+        "On sert à **droite** si le total des points joués est **pair** (0-0, 15-15, 40-15…), à **gauche** s'il est **impair** (15-0, 30-15…).",
+        "## Les balles",
+        "Sur la ligne = **bonne**. Entièrement dehors = **faute**. En simple, le **couloir** est faute. Au service : **carré en diagonale**.",
+        "Sans arbitre, chaque joueur juge les balles de **son côté**. En cas de doute, la balle est **bonne**.",
+        "## Changer de côté",
+        "Quand le **total des jeux est impair** (après le 1er, 3e, 5e jeu…). Au jeu décisif : **tous les 6 points**."
+      ],
+      retenir: "Connaître les règles pour ne jamais intervenir à tort.",
+      cards: [
+        { q: "Comment compte-t-on les points dans un jeu ?", a: "15, 30, 40, jeu." },
+        { q: "Que se passe-t-il à 40A ?", a: "Point décisif : un seul point décide du jeu.", n: "Le relanceur choisit le côté." },
+        { q: "Comment compte-t-on au jeu décisif ?", a: "1, 2, 3… Premier à 7 points, avec 2 points d'écart.", n: "Chez les jeunes : super jeu décisif à 10 points à la place du 3e set." },
+        { q: "Le score est 30/15. De quel côté le serveur sert-il ?", a: "À gauche.", n: "3 points joués (impair) : gauche." },
+        { q: "Le score est 15/15. De quel côté le serveur sert-il ?", a: "À droite.", n: "2 points joués (pair) : droite." },
+        { q: "Une balle touche la ligne. Bonne ou faute ?", a: "Bonne." },
+        { q: "En simple, la balle tombe dans le couloir. Bonne ou faute ?", a: "Faute." },
+        { q: "Sans arbitre, qui juge les balles ?", a: "Chaque joueur juge les balles de son côté du filet.", n: "En cas de doute, la balle est bonne." },
+        { q: "Quand change-t-on de côté ?", a: "Quand le total des jeux est impair.", n: "Au jeu décisif : tous les 6 points." }
+      ]
+    },
+    {
+      title: "Avant les matchs",
+      intro: "Préparer son enfant, sans le faire à sa place.",
+      points: [
+        "## L'inscription et le format",
+        "Inscrivez votre enfant avec l'application **Ten'Up** (et l'appli du club pour l'académie).",
+        "Rappelez le **format** et le **type de tournoi** : **tournoi classique** (élimination directe) ou **TMC** (3 ou 4 matchs dans la journée ou le week-end).",
+        "## L'état d'esprit",
+        "Rappelez qu'**un match n'est jamais fini** : on se bat jusqu'au bout.",
+        "Fixez des **objectifs liés au travail fait en cours**, pas aux résultats.",
+        "## L'organisation",
+        "**Autonomie** : aidez à préparer le sac (bouteille, serviette, nourriture, chaussures de rechange, élastique, corde à sauter), puis laissez l'enfant le préparer et le **porter**.",
+        "**Arrivez 15 minutes avant** : moins de stress du retard, et le temps de s'échauffer avant d'entrer sur le court."
+      ],
+      retenir: "Ten'Up, format du tournoi, objectifs de jeu, sac préparé par l'enfant, arrivée 15 minutes avant.",
+      cards: [
+        { q: "Quelle application permet d'inscrire son enfant à un tournoi ?", a: "Ten'Up.", n: "Et l'appli du club pour l'académie." },
+        { q: "Quels sont les deux types de tournois ?", a: "Tournoi classique (élimination directe) et TMC (3 ou 4 matchs).", n: "Dans la journée ou le week-end." },
+        { q: "Que rappeler à son enfant à propos du match ?", a: "Un match n'est jamais fini : on se bat jusqu'au bout." },
+        { q: "Quels objectifs fixer ?", a: "Des objectifs liés à ce qu'il a travaillé en cours.", n: "Pas liés aux résultats." },
+        { q: "Que contient le sac ?", a: "Bouteille, serviette, nourriture, chaussures de rechange, élastique, corde à sauter." },
+        { q: "Comment favoriser l'autonomie ?", a: "Aider à préparer le sac, puis laisser l'enfant le préparer et le porter." },
+        { q: "Quand arriver avant les matchs ?", a: "15 minutes avant.", n: "Pour limiter le stress du retard et s'échauffer." }
+      ]
+    },
+    {
+      title: "Pendant les matchs",
+      intro: "Être présent et positif, sans coacher.",
+      points: [
+        "Choisissez une place **bien visible** par votre enfant, et **restez** : évitez de partir pendant un match.",
+        "**Encouragez, félicitez, applaudissez**, sans **coacher**.",
+        "Évitez tout **regard ou commentaire négatif** : on reste **positif**, quel que soit le déroulement.",
+        "**Respectez** le jeu, les autres parents et l'adversaire. **N'intervenez pas sur l'arbitrage**.",
+        "Un problème ? Demandez à parler au **juge arbitre**."
+      ],
+      retenir: "Visible, présent, positif, sans coaching ni intervention sur l'arbitrage.",
+      cards: [
+        { q: "Où se placer pour regarder le match ?", a: "À un endroit bien visible par l'enfant." },
+        { q: "Peut-on partir pendant un match ?", a: "Il vaut mieux éviter : on montre son implication." },
+        { q: "Que peut faire un parent pendant le match ?", a: "Encourager, féliciter, applaudir.", n: "Sans coacher." },
+        { q: "Comment réagir quand le match se passe mal ?", a: "On reste positif, quel que soit le déroulement.", n: "On évite tout regard ou commentaire négatif." },
+        { q: "Un parent n'est pas d'accord avec un appel de balle. Que fait-il ?", a: "Il n'intervient pas sur l'arbitrage.", n: "On respecte le jeu, les parents et l'adversaire." },
+        { q: "Qui solliciter en cas de problème ?", a: "Le juge arbitre." }
+      ]
+    },
+    {
+      title: "Après le match",
+      intro: "Débriefer avec calme, puis préparer la suite.",
+      points: [
+        "**Attendez quelques minutes** avant le débrief.",
+        "Rappelez les **objectifs** fixés : ont-ils été atteints ?",
+        "Demandez **un point positif** et **un point à améliorer**.",
+        "Préparez le **match suivant** : quand il rejoue, ce qu'il peut faire en attendant.",
+        "**Échauffement 15 minutes avant** le prochain match : courses, jeux avec balles, et raquette si possible."
+      ],
+      retenir: "Débrief calme : un point positif, un point à améliorer, puis on prépare la suite.",
+      cards: [
+        { q: "Quand faire le débrief ?", a: "Après quelques minutes." },
+        { q: "Que rappeler pendant le débrief ?", a: "Les objectifs fixés, et voir s'ils sont atteints." },
+        { q: "Que demander à l'enfant ?", a: "Un point positif et un point à améliorer." },
+        { q: "Comment préparer le match suivant ?", a: "Expliquer quand l'enfant rejoue et ce qu'il peut faire en attendant." },
+        { q: "Quel échauffement avant le prochain match ?", a: "15 minutes avant : courses, jeux avec balles, et raquette si possible." }
+      ]
+    }
+  ],
+  bank: [
+    { t: 0, q: "Comment compte-t-on les points dans un jeu ?", ok: "15, 30, 40, jeu", ko: ["1, 2, 3, jeu", "10, 20, 30, jeu", "15, 30, 45, jeu"] },
+    { t: 0, q: "Combien de points faut-il gagner pour remporter un jeu ?", ok: "4 points", ko: ["3 points", "5 points", "6 points"] },
+    { t: 0, q: "Quel score annonce-t-on en premier ?", ok: "Celui du serveur", ko: ["Celui du relanceur", "Le plus élevé", "Le plus petit"] },
+    { t: 0, q: "Le serveur a 30 et le relanceur a 15. Quel est le score annoncé ?", ok: "30/15", ko: ["15/30", "30/30", "40/15"], n: "On annonce d'abord le score du serveur." },
+    { t: 0, q: "Le serveur a 15 et le relanceur a 40. Quel est le score annoncé ?", ok: "15/40", ko: ["40/15", "15/30", "30/40"], n: "On annonce d'abord le score du serveur." },
+    { t: 0, q: "Le serveur gagne le point à 40/0. Que se passe-t-il ?", ok: "Il gagne le jeu", ko: ["Il passe à l'avantage", "On rejoue le point", "Il a 45"] },
+    { t: 0, q: "Que signifie « 40A » ?", ok: "Les deux joueurs ont 40 : un seul point décide du jeu", ko: ["Le serveur a l'avantage", "Le jeu est terminé", "On joue un jeu décisif"] },
+    { t: 0, q: "Au point décisif, qui choisit le côté ?", ok: "Le relanceur", ko: ["Le serveur", "Le juge arbitre", "Les parents"] },
+    { t: 0, q: "Au point décisif, combien de points reste-t-il à jouer pour gagner le jeu ?", ok: "Un seul", ko: ["Deux", "Trois", "Un jeu entier"] },
+    { t: 0, q: "Comment compte-t-on dans un jeu décisif ?", ok: "1, 2, 3, 4…", ko: ["15, 30, 40", "0, 15, 30", "10, 20, 30"] },
+    { t: 0, q: "Un jeu décisif se gagne à…", ok: "7 points avec 2 points d'écart", ko: ["4 points", "7 points sans écart", "10 points"] },
+    { t: 0, q: "Chacun a gagné un set (formats jeunes). Que joue-t-on pour le 3e set ?", ok: "Un super jeu décisif à 10 points", ko: ["Un 3e set complet", "Un jeu décisif à 7 points", "Rien : le match s'arrête"] },
+    { t: 0, q: "Dans un set à 4 jeux, à quel score joue-t-on le jeu décisif ?", ok: "À 3-3", ko: ["À 2-2", "À 4-4", "À 5-5"] },
+    { t: 0, q: "Dans un set à 3 jeux, à quel score joue-t-on le jeu décisif ?", ok: "À 2-2", ko: ["À 3-3", "À 4-4", "À 1-1"] },
+    { t: 0, q: "Au jeu décisif, les deux joueurs ont 6 points. Comment gagner ?", ok: "Avoir 2 points de plus que l'adversaire", ko: ["Marquer un seul point", "Atteindre 10 points", "Rejouer le jeu décisif"] },
+    { t: 0, q: "Le score est 0/0. De quel côté le serveur sert-il ?", ok: "À droite", ko: ["À gauche", "Au choix du serveur"], n: "On commence toujours un jeu à droite." },
+    { t: 0, q: "Le score est 15/0. De quel côté le serveur sert-il ?", ok: "À gauche", ko: ["À droite", "Au choix du serveur"], n: "1 point joué (impair) : gauche." },
+    { t: 0, q: "Le score est 15/15. De quel côté le serveur sert-il ?", ok: "À droite", ko: ["À gauche", "Au choix du serveur"], n: "2 points joués (pair) : droite." },
+    { t: 0, q: "Le score est 30/15. De quel côté le serveur sert-il ?", ok: "À gauche", ko: ["À droite", "Au choix du serveur"], n: "3 points joués (impair) : gauche." },
+    { t: 0, q: "Le score est 40/15. De quel côté le serveur sert-il ?", ok: "À droite", ko: ["À gauche", "Au choix du serveur"], n: "4 points joués (pair) : droite." },
+    { t: 0, q: "Le score est 40/30. De quel côté le serveur sert-il ?", ok: "À gauche", ko: ["À droite", "Au choix du serveur"], n: "5 points joués (impair) : gauche." },
+    { t: 0, q: "Le serveur sert de sa droite. Où se place le relanceur ?", ok: "À sa droite, en diagonale du serveur", ko: ["À sa gauche", "Au filet", "Derrière le serveur"] },
+    { t: 0, q: "Une balle touche la ligne. Elle est…", ok: "Bonne", ko: ["Faute", "À rejouer"] },
+    { t: 0, q: "En simple, une balle tombe dans le couloir. Elle est…", ok: "Faute", ko: ["Bonne", "À rejouer"] },
+    { t: 0, q: "Au service, la balle doit tomber…", ok: "Dans le carré en diagonale", ko: ["Dans n'importe quel carré", "Dans le carré juste en face", "Dans le couloir"] },
+    { t: 0, q: "Sans arbitre, qui juge les balles ?", ok: "Chaque joueur, pour les balles de son côté du filet", ko: ["Les parents", "L'adversaire, pour toutes les balles", "Personne"] },
+    { t: 0, q: "Un joueur hésite sur une balle proche de la ligne. Que doit-il faire ?", ok: "La considérer comme bonne", ko: ["La considérer comme faute", "Appeler ses parents", "Rejouer le point"] },
+    { t: 0, q: "Un joueur sert de sa droite. La balle tombe là. Bonne ou faute ?", img: { x: 8.4, d: 1.5, srv: "droite" }, ok: "Bonne", ko: ["Faute", "À rejouer"], n: "Elle tombe dans le bon carré, en diagonale." },
+    { t: 0, q: "Un joueur sert de sa droite. La balle tombe là. Bonne ou faute ?", img: { x: 3.0, d: 2.0, srv: "droite" }, ok: "Faute", ko: ["Bonne", "À rejouer"], n: "Elle tombe dans le mauvais carré : au service, c'est le carré en diagonale." },
+    { t: 0, q: "Un joueur sert de sa gauche. La balle tombe là. Bonne ou faute ?", img: { x: 3.0, d: 7.2, srv: "gauche" }, ok: "Faute", ko: ["Bonne", "À rejouer"], n: "Elle tombe derrière la ligne de service : elle est trop longue." },
+    { t: 0, q: "Un joueur vient de frapper, en simple. La balle tombe là. Bonne ou faute ?", img: { x: 8.0, d: 11.9, far: true, hl: "Frappeur", ol: "Adversaire" }, ok: "Bonne", ko: ["Faute", "À rejouer"], n: "Elle touche une ligne : une balle sur la ligne est bonne." },
+    { t: 0, q: "Un joueur vient de frapper, en simple. La balle tombe là. Bonne ou faute ?", img: { x: 3.0, d: 12.9, far: true, hl: "Frappeur", ol: "Adversaire" }, ok: "Faute", ko: ["Bonne", "À rejouer"], n: "Elle tombe derrière la ligne de fond." },
+    { t: 0, q: "Un joueur vient de frapper, en simple. La balle tombe là. Bonne ou faute ?", img: { x: 10.285, d: 7.0, far: true, hl: "Frappeur", ol: "Adversaire" }, ok: "Faute", ko: ["Bonne", "À rejouer"], n: "Elle tombe dans le couloir, hors du terrain en simple." },
+    { t: 0, q: "Un joueur vient de frapper, en simple. La balle tombe là. Bonne ou faute ?", img: { x: 5.0, d: 2.0, hl: "Frappeur", ol: "Adversaire" }, ok: "Bonne", ko: ["Faute", "À rejouer"], n: "Elle tombe bien dans le terrain." },
+    { t: 0, q: "Un joueur vient de frapper, en simple. La balle tombe là. Bonne ou faute ?", img: { x: 1.3, d: 6.0, hl: "Frappeur", ol: "Adversaire" }, ok: "Bonne", ko: ["Faute", "À rejouer"], n: "Elle touche une ligne : une balle sur la ligne est bonne." },
+    { t: 0, q: "Après quels jeux change-t-on de côté ?", ok: "Après les jeux impairs (1er, 3e, 5e…)", ko: ["Après chaque jeu", "Après les jeux pairs", "Après chaque point"] },
+    { t: 0, q: "Le score en jeux est 1-0. Change-t-on de côté ?", ok: "Oui", ko: ["Non", "Seulement si un joueur le demande"], n: "1 jeu joué : c'est impair." },
+    { t: 0, q: "Le score en jeux est 2-0. Change-t-on de côté ?", ok: "Non", ko: ["Oui", "Seulement si un joueur le demande"], n: "2 jeux joués : c'est pair." },
+    { t: 0, q: "Le score en jeux est 2-1. Change-t-on de côté ?", ok: "Oui", ko: ["Non", "Seulement si un joueur le demande"], n: "3 jeux joués : c'est impair." },
+    { t: 0, q: "Le score en jeux est 3-1. Change-t-on de côté ?", ok: "Non", ko: ["Oui", "Seulement si un joueur le demande"], n: "4 jeux joués : c'est pair." },
+    { t: 0, q: "Au jeu décisif, tous les combien de points change-t-on de côté ?", ok: "Tous les 6 points", ko: ["Tous les 2 points", "Tous les 4 points", "Jamais"] },
+    { t: 1, q: "Quelle application permet d'inscrire son enfant à un tournoi ?", ok: "Ten'Up", ko: ["Strava", "WhatsApp", "Google Maps"] },
+    { t: 1, q: "Que rappelle-t-on à son enfant avant un tournoi ?", ok: "Le format du tournoi et le nombre de matchs possibles", ko: ["Le classement de ses adversaires", "Le prix des raquettes", "L'heure du dîner"] },
+    { t: 1, q: "Dans un tournoi à élimination directe, que se passe-t-il quand on perd ?", ok: "On est éliminé du tournoi", ko: ["On rejoue le match", "On passe au tour suivant", "On gagne quand même"] },
+    { t: 1, q: "Dans un TMC, combien de matchs joue-t-on en général ?", ok: "3 ou 4 matchs, dans la journée ou le week-end", ko: ["Un seul match", "10 matchs", "Un match par mois"] },
+    { t: 1, q: "Votre enfant dit « c'est déjà perdu ». Que lui rappelez-vous ?", ok: "Un match n'est jamais fini : on se bat jusqu'au bout", ko: ["Ce n'est pas grave de perdre", "Il peut abandonner", "Il doit gagner à tout prix"] },
+    { t: 1, q: "Quels objectifs fixer à son enfant ?", ok: "Des objectifs liés à ce qu'il a travaillé en cours", ko: ["Gagner le tournoi", "Ne pas perdre un seul jeu", "Battre le joueur le mieux classé"] },
+    { t: 1, q: "Pourquoi préférer des objectifs de jeu aux résultats ?", ok: "Pour se concentrer sur ce qui a été travaillé, plutôt que sur le résultat", ko: ["Parce que le résultat n'a aucune importance", "Parce que c'est plus simple pour le juge arbitre", "Parce que Ten'Up l'exige"] },
+    { t: 1, q: "Que doit contenir le sac de tennis ?", ok: "Bouteille, serviette, nourriture, chaussures de rechange, élastique et corde à sauter", ko: ["Seulement la raquette", "Un téléphone et des jeux vidéo", "Des bonbons uniquement"] },
+    { t: 1, q: "Pour rendre son enfant autonome, que fait le parent ?", ok: "Il l'aide à préparer son sac, puis le laisse le faire", ko: ["Il prépare tout à sa place", "Il ne s'en occupe jamais", "Il demande à l'entraîneur"] },
+    { t: 1, q: "Qui porte le matériel de l'enfant ?", ok: "L'enfant lui-même", ko: ["Le parent", "L'adversaire", "Le juge arbitre"] },
+    { t: 1, q: "Lequel de ces objets va dans le sac ?", ok: "Une bouteille d'eau", ko: ["Une console de jeux", "Un ballon de foot", "Un skateboard"] },
+    { t: 1, q: "Lequel de ces objets sert à s'échauffer ?", ok: "Une corde à sauter", ko: ["Un ballon de basket", "Une console", "Un vélo"] },
+    { t: 1, q: "Combien de temps avant le début des matchs faut-il arriver ?", ok: "15 minutes", ko: ["5 minutes", "À l'heure pile", "1 heure"] },
+    { t: 1, q: "Pourquoi arriver 15 minutes avant ?", ok: "Pour limiter le stress du retard et s'échauffer avant d'entrer sur le court", ko: ["Pour discuter avec l'arbitre", "Pour choisir son adversaire", "Pour changer de club"] },
+    { t: 1, q: "Que fait l'enfant avant d'entrer sur le court ?", ok: "Il s'échauffe", ko: ["Il fait une sieste", "Il prépare un goûter", "Il regarde les autres matchs"] },
+    { t: 2, q: "Où se placer pour regarder le match de son enfant ?", ok: "À un endroit bien visible par l'enfant", ko: ["Cachée derrière le grillage", "Sur le court", "Loin du terrain"] },
+    { t: 2, q: "Peut-on partir pendant le match de son enfant ?", ok: "Il vaut mieux éviter : on montre son implication", ko: ["Oui, dès le 1er jeu", "Oui, si le score est mauvais", "Oui, à chaque changement de côté"] },
+    { t: 2, q: "Que peut faire un parent pendant le match ?", ok: "Encourager, féliciter et applaudir", ko: ["Donner des consignes de jeu", "Corriger l'arbitre", "Parler à l'adversaire"] },
+    { t: 2, q: "Un parent crie « avance au filet ! ». Comment appelle-t-on cela ?", ok: "Du coaching : on l'évite", ko: ["De l'encouragement", "De l'arbitrage", "De l'échauffement"] },
+    { t: 2, q: "Votre enfant fait une double faute. Que faites-vous ?", ok: "Je reste positif", ko: ["Je soupire", "Je critique à voix haute", "Je pars"] },
+    { t: 2, q: "Votre enfant est mené 0-4. Comment réagissez-vous ?", ok: "Je reste positif, quel que soit le déroulement", ko: ["Je lui fais les gros yeux", "Je lui crie quoi faire", "Je m'en vais"] },
+    { t: 2, q: "Un parent lève les yeux au ciel après une faute de son enfant. Est-ce adapté ?", ok: "Non : on évite tout regard ou commentaire négatif", ko: ["Oui, ça le motive", "Oui, s'il a raté un point facile", "Oui, si personne ne voit"] },
+    { t: 2, q: "Que respecte-t-on pendant un match ?", ok: "Le jeu, les parents et l'adversaire", ko: ["Seulement son enfant", "Seulement l'arbitre", "Rien : c'est un jeu"] },
+    { t: 2, q: "Un parent n'est pas d'accord avec un appel de balle. Que fait-il ?", ok: "Il n'intervient pas sur l'arbitrage", ko: ["Il crie « faute ! »", "Il entre sur le court", "Il parle à l'adversaire"] },
+    { t: 2, q: "Qui peut-on solliciter en cas de problème ?", ok: "Le juge arbitre", ko: ["L'adversaire", "Les autres spectateurs", "L'entraîneur par téléphone"] },
+    { t: 2, q: "Un parent crie « faute ! » sur une balle de l'adversaire. Est-ce permis ?", ok: "Non : on n'intervient pas sur l'arbitrage", ko: ["Oui, s'il est sûr", "Oui, une seule fois", "Oui, s'il est le parent de l'enfant"] },
+    { t: 2, q: "Un parent applaudit un beau point de l'adversaire. Est-ce adapté ?", ok: "Oui : on respecte l'adversaire", ko: ["Non, jamais", "Non, c'est de la triche", "Non, c'est du coaching"] },
+    { t: 2, q: "Un parent entre sur le court pendant le match pour parler à son enfant. Est-ce adapté ?", ok: "Non", ko: ["Oui, entre deux jeux", "Oui, pour lui donner de l'eau", "Oui, pour le motiver"] },
+    { t: 2, q: "Pourquoi le rôle du parent est-il important dans le tennis ?", ok: "Parce que l'entraîneur est très rarement au bord du terrain", ko: ["Parce que les parents arbitrent", "Parce que les matchs sont courts", "Parce que le tennis est un sport collectif"] },
+    { t: 2, q: "Le tennis est un sport…", ok: "Individuel", ko: ["Collectif", "Sans règles", "Réservé aux adultes"] },
+    { t: 3, q: "Quand faire le débrief ?", ok: "Après quelques minutes", ko: ["Tout de suite, à chaud", "Le lendemain matin seulement", "Pendant le match suivant"] },
+    { t: 3, q: "Votre enfant vient de perdre, il est très déçu. Que faites-vous ?", ok: "J'attends quelques minutes avant de parler du match", ko: ["Je le critique tout de suite", "Je lui explique toutes ses erreurs", "Je ne lui parle plus"] },
+    { t: 3, q: "Que rappelle-t-on pendant le débrief ?", ok: "Les objectifs fixés avant le match", ko: ["Le score de l'adversaire", "Les erreurs de l'arbitre", "Le prix du tournoi"] },
+    { t: 3, q: "Pourquoi rappelle-t-on les objectifs ?", ok: "Pour voir si l'enfant les a atteints", ko: ["Pour le punir", "Pour comparer avec ses amis", "Pour choisir son prochain adversaire"] },
+    { t: 3, q: "Que demande-t-on à l'enfant pendant le débrief ?", ok: "Un point positif et un point à améliorer", ko: ["Seulement ses erreurs", "Seulement ce qui était réussi", "Le nom de l'arbitre"] },
+    { t: 3, q: "Votre enfant a gagné. Que faites-vous ?", ok: "Je le félicite, puis je demande un point positif et un point à améliorer", ko: ["Je lui dis qu'il est le meilleur", "Je ne dis rien", "Je lui reproche ses erreurs"] },
+    { t: 3, q: "Que prépare-t-on après un match ?", ok: "Le match suivant", ko: ["Les vacances", "Le dîner de classe", "Le prochain anniversaire"] },
+    { t: 3, q: "Que faut-il expliquer à l'enfant pour le match suivant ?", ok: "Quand il va rejouer et ce qu'il peut faire en attendant", ko: ["Comment gagner à coup sûr", "Le score de ses adversaires", "Les règles du tournoi suivant"] },
+    { t: 3, q: "Combien de temps avant le match suivant refait-on un échauffement ?", ok: "15 minutes avant", ko: ["5 minutes avant", "1 heure avant", "Après le match"] },
+    { t: 3, q: "Que comprend cet échauffement ?", ok: "Courses, jeux avec balles et raquette si possible", ko: ["Uniquement de la raquette", "Uniquement des étirements", "Rien : on se repose"] },
+  ]
+}
+];
+
+/* ---------------- Terrain entier avec joueurs et balle (vue de dessus) ---------------- */
+const CS = 14, CMX = 1.3, CMY = 2.0, CW = 10.97, CL = 11.885, CSL = 6.4, CAL = 1.37, CR = 6;
+function court(img, label) {
+  const w = (CW + 2 * CMX) * CS, h = (2 * CL + 2 * CMY) * CS;
+  const X = v => (CMX + v) * CS, Y = v => (CMY + v) * CS;
+  const ln = (a, b, c, d) => '<line x1="' + X(a) + '" y1="' + Y(b) + '" x2="' + X(c) + '" y2="' + Y(d) + '"/>';
+  const bx = img.x, by = img.far ? CL - img.d : CL + img.d;
+  const hitTop = img.srv ? true : !img.far;
+  const hl = img.srv ? "Serveur" : (img.hl || "Frappeur"), ol = img.srv ? "Relanceur" : (img.ol || "Adversaire");
+  const topY = -0.8, botY = 2 * CL + 0.8;
+  const hy = hitTop ? topY : botY, oy = hitTop ? botY : topY;
+  const hx = img.srv ? CW / 2 + (img.srv === "droite" ? -1.4 : 1.4) : CW / 2;
+  const ox = img.srv ? CW / 2 : (bx < CW / 2 ? CW / 2 + 1.0 : CW / 2 - 1.0);
+  const px = v => Math.abs(v - CW / 2) < 0.5 ? CW / 2 + 2.5 : CW - v;
+  const pl = (x, y, fill, stroke, r, text, dir) => {
+    let s = '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5"/>';
+    if (text) {
+      const right = dir ? dir === "r" : X(x) <= w / 2 + 1;
+      s += '<text x="' + (X(x) + (right ? 13 : -13)) + '" y="' + (Y(y) + 4) + '" font-size="11" fill="#ffffff" text-anchor="' + (right ? "start" : "end") + '">' + esc(text) + '</text>';
+    }
+    return s;
+  };
+  let s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img"><title>' + esc(label) + '</title>';
+  s += '<rect x="0" y="0" width="' + w + '" height="' + h + '" fill="#3f8a55"/>';
+  s += '<rect x="' + X(0) + '" y="' + Y(0) + '" width="' + (CW * CS) + '" height="' + (2 * CL * CS) + '" fill="#2f6db5"/>';
+  s += '<g stroke="#ffffff" stroke-width="2.2" fill="none" stroke-linecap="square">';
+  s += ln(0, 0, CW, 0) + ln(0, 2 * CL, CW, 2 * CL) + ln(0, 0, 0, 2 * CL) + ln(CW, 0, CW, 2 * CL) + ln(CAL, 0, CAL, 2 * CL) + ln(CW - CAL, 0, CW - CAL, 2 * CL);
+  s += ln(CAL, CL - CSL, CW - CAL, CL - CSL) + ln(CAL, CL + CSL, CW - CAL, CL + CSL) + ln(CW / 2, CL - CSL, CW / 2, CL + CSL);
+  s += ln(CW / 2, 0, CW / 2, 0.45) + ln(CW / 2, 2 * CL, CW / 2, 2 * CL - 0.45) + '</g>';
+  s += '<rect x="' + (X(0) - 6) + '" y="' + (Y(CL) - 2.5) + '" width="' + (CW * CS + 12) + '" height="5" fill="#f2f2f2" stroke="#444444" stroke-width="0.5"/>';
+  s += '<line x1="' + X(hx) + '" y1="' + Y(hy) + '" x2="' + X(bx) + '" y2="' + Y(by) + '" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85"/>';
+  if (img.dbl) {
+    s += pl(px(hx), hitTop ? CL - 1.8 : CL + 1.8, "#ff7a1a", "#ffffff", 6, "");
+    s += pl(px(ox), hitTop ? CL + 1.8 : CL - 1.8, "#f2f2f2", "#444444", 6, "");
+  }
+  s += pl(hx, hy, "#ff7a1a", "#ffffff", 7, hl);
+  s += pl(ox, oy, "#f2f2f2", "#444444", 7, ol, img.srv ? "" : (bx < CW / 2 ? "r" : "l"));
+  s += '<circle cx="' + X(bx) + '" cy="' + Y(by) + '" r="' + CR + '" fill="#d9e83f" stroke="#6f7d0c" stroke-width="1"/></svg>';
+  return s;
+}
+
+/* ---------------- Progression (gardée sur l'appareil) ---------------- */
+const KEY = "formation-tcb-parents-v1";
+let P = { done: {} };
+function loadP() { try { const d = JSON.parse(localStorage.getItem(KEY) || "null"); if (d && d.done) P = d; } catch (e) {} }
+function saveP() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} }
+function pk(li, x) { return LEVELS[li].id + "-" + x; }
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function fmt(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+function shuffled(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+let V = { view: "level", li: 0 };
+
+function dots(li, active) {
+  const L = LEVELS[li];
+  let h = '<div class="dots" aria-hidden="true">';
+  for (let i = 0; i <= L.themes.length; i++) {
+    const key = pk(li, i === L.themes.length ? "v" : "t" + i);
+    const d = P.done[key];
+    h += '<span class="dot' + (i === active ? " on" : (d && (i < L.themes.length || d.passed)) ? " done" : "") + '"></span>';
+  }
+  return h + '</div>';
+}
+
+/* ---------------- Vues ---------------- */
+function homeHTML() {
+  let h = '<a class="homelink" href="../">← Accueil</a><h1>Devenir jeune arbitre</h1>' +
+    '<p class="sub">Deux niveaux de formation. Chaque niveau : des leçons, des flash cards pour réviser, puis un quiz de validation.</p><ol class="path">';
+  LEVELS.forEach((L, i) => {
+    if (L.soon) {
+      h += '<li><div class="step soon"><span class="num">' + (i + 1) + '</span><span class="txt"><b>' + esc(L.name) + '</b><small>' + esc(L.sub) + ' · ' + esc(L.intro) + '</small></span><span class="st">Bientôt</span></div></li>';
+    } else {
+      const v = P.done[pk(i, "v")];
+      h += '<li><button class="step" data-act="level" data-l="' + i + '" type="button"><span class="num">' + (i + 1) + '</span>' +
+        '<span class="txt"><b>' + esc(L.name) + '</b><small>' + esc(L.sub) + ' · ' + esc(L.intro) + '</small></span>' +
+        (v && v.passed ? '<span class="st">✓ Validé</span>' : "") + '</button></li>';
+    }
+  });
+  return h + '</ol>';
+}
+
+function levelHTML() {
+  const li = V.li, L = LEVELS[li], v = P.done[pk(li, "v")];
+  let h = '<div class="topbar"><a class="homelink" href="../">← Accueil</a><span class="lbl">' + esc(L.sub) + '</span></div>' +
+    '<h1>' + esc(L.name) + '</h1><p class="sub">' + esc(L.intro) + '</p>' +
+    '<div class="valider"><b>Pour obtenir le label « Parent responsable »</b><ul><li>Suivre les ' + L.themes.length + ' thèmes : une leçon courte, puis des flash cards d\'entraînement.</li>' +
+    '<li>Réussir le quiz final : ' + L.valid.pass + ' bonnes réponses sur ' + L.valid.n + '.</li></ul></div><ol class="path">';
+  L.themes.forEach((t, i) => {
+    const d = P.done[pk(li, "t" + i)];
+    h += '<li><button class="step" data-act="theme" data-l="' + li + '" data-i="' + i + '" type="button"><span class="num">' + (i + 1) + '</span>' +
+      '<span class="txt"><b>' + esc(t.title) + '</b><small>' + esc(t.intro) + '</small></span>' +
+      (d ? '<span class="st">✓ ' + d.k + '/' + d.n + '</span>' : "") + '</button></li>';
+  });
+  h += '<li><button class="step final" data-act="quiz" data-l="' + li + '" type="button"><span class="num">★</span>' +
+    '<span class="txt"><b>Quiz final</b><small>' + L.valid.n + ' questions au hasard parmi ' + L.bank.length + ' · validation à ' + L.valid.pass + '/' + L.valid.n + '</small></span>' +
+    (v ? '<span class="st">' + (v.passed ? "✓ Label obtenu" : "Dernier : " + v.k + "/" + v.n) + '</span>' : "") + '</button></li></ol>';
+  return h;
+}
+
+function lessonHTML() {
+  const li = V.li, i = V.ti, L = LEVELS[li], t = L.themes[i];
+  const items = t.points.map(p => p.indexOf("## ") === 0 ? '<li class="hd">' + esc(p.slice(3)) + '</li>' : '<li>' + fmt(p) + '</li>').join("");
+  return '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← Formation</button>' +
+    '<span class="lbl">Thème ' + (i + 1) + ' sur ' + L.themes.length + '</span></div>' + dots(li, i) +
+    '<h1>' + esc(t.title) + '</h1><p class="sub">' + esc(t.intro) + '</p>' +
+    '<ul class="lesson">' + items + '</ul>' +
+    '<div class="retenir"><span>À retenir</span>' + esc(t.retenir) + '</div>' +
+    '<button class="btn big" data-act="cards" type="button">S\'entraîner avec les flash cards (' + t.cards.length + ')</button>';
+}
+
+function deckHTML() {
+  const total = V.cards.length, k = V.cards[V.idx], L = LEVELS[V.li];
+  return '<div class="topbar"><button class="link" data-act="level" data-l="' + V.li + '" type="button">← Formation</button>' +
+    '<span class="lbl">Flash cards · Thème ' + (V.ti + 1) + '</span></div>' +
+    '<div class="bar"><span>Carte ' + (V.idx + 1) + ' sur ' + total + '</span></div>' +
+    '<div class="track" aria-hidden="true"><div class="fill" style="width:' + (V.idx / total * 100) + '%"></div></div>' +
+    '<div class="scene"><div class="card' + (V.flipped ? " flipped" : "") + '" id="card" role="button" tabindex="0" aria-label="Carte : retourner pour voir la réponse">' +
+      '<div class="face front" aria-hidden="' + V.flipped + '"><span class="cat">' + esc(L.themes[V.ti].title) + '</span><p class="q">' + esc(k.q) + '</p>' +
+        (k.img ? '<div class="art">' + court(k.img, k.q) + '</div>' : "") + '</div>' +
+      '<div class="face back" aria-hidden="' + (!V.flipped) + '"><span class="cat">Réponse</span><p class="a">' + esc(k.a) + '</p>' + (k.n ? '<p class="n">' + esc(k.n) + '</p>' : "") + '</div>' +
+    '</div></div>' +
+    '<p class="hint" id="hint">' + (V.flipped ? "Vous le saviez ?" : "Touchez la carte pour voir la réponse") + '</p>' +
+    '<div class="actions"><button class="btn retry" id="bRetry" data-act="no" type="button"' + (V.flipped ? "" : " disabled") + '>À revoir</button>' +
+    '<button class="btn ok" id="bOk" data-act="yes" type="button"' + (V.flipped ? "" : " disabled") + '>Je savais</button></div>' +
+    '<div class="nav"><button class="link" data-act="skip" type="button">Passer</button></div>';
+}
+
+function resultHTML() {
+  const li = V.li, L = LEVELS[li], n = V.cards.length, k = V.known, miss = V.missed;
+  const msg = k === n ? "Parfait, aucune erreur !" : k / n >= 0.7 ? "Bien joué !" : "Continuez, vous progressez !";
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← Formation</button><span class="lbl">Thème ' + (V.ti + 1) + '</span></div>' +
+    '<div class="done"><h2>' + msg + '</h2><div class="score">' + k + ' / ' + n + '</div>';
+  if (miss.length) h += '<button class="btn main" data-act="redo" type="button">Refaire les ' + miss.length + ' cartes à revoir</button>';
+  const cls = miss.length ? "sec" : "main";
+  if (V.ti < L.themes.length - 1) {
+    h += '<button class="btn ' + cls + '" data-act="theme" data-l="' + li + '" data-i="' + (V.ti + 1) + '" type="button">Thème suivant : ' + esc(L.themes[V.ti + 1].title) + '</button>';
+  } else {
+    h += '<button class="btn ' + cls + '" data-act="quiz" data-l="' + li + '" type="button">Passer au quiz final</button>';
+  }
+  return h + '<button class="btn sec" data-act="level" data-l="' + li + '" type="button">Retour à la formation</button></div>';
+}
+
+function quizHTML() {
+  const L = LEVELS[V.li], q = V.qs[V.idx], total = V.qs.length;
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + V.li + '" type="button">← Formation</button>' +
+    '<span class="lbl">Quiz final</span></div>' +
+    '<div class="bar"><span>Question ' + (V.idx + 1) + ' sur ' + total + '</span><span>Objectif : ' + L.valid.pass + '/' + L.valid.n + '</span></div>' +
+    '<div class="track" aria-hidden="true"><div class="fill" style="width:' + (V.idx / total * 100) + '%"></div></div>' +
+    '<div class="qbox"><p class="q">' + esc(q.q) + '</p>' + (q.img ? '<div class="art">' + court(q.img, q.q) + '</div>' : "") + '</div><div class="opts">';
+  q.opts.forEach((o, i) => {
+    let cls = "opt";
+    if (V.answered) cls += o.c ? " good" : (i === V.chosen ? " bad" : "");
+    h += '<button class="' + cls + '" data-act="opt" data-i="' + i + '" type="button"' + (V.answered ? " disabled" : "") + '>' + esc(o.t) + '</button>';
+  });
+  h += '</div>';
+  if (V.answered) {
+    const good = q.opts[V.chosen].c;
+    h += '<p class="expl">' + (good ? "Bonne réponse !" : "Pas tout à fait.") + (q.n ? " " + esc(q.n) : "") + '</p>' +
+      '<button class="btn big" data-act="qnext" type="button">' + (V.idx + 1 < total ? "Question suivante" : "Voir mon résultat") + '</button>';
+  }
+  return h;
+}
+
+function qresultHTML() {
+  const li = V.li, L = LEVELS[li], n = V.qs.length, k = V.score, passed = k >= L.valid.pass;
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← Formation</button><span class="lbl">Quiz final</span></div>' +
+    '<div class="done"><h2>' + (passed ? "Bravo !" : "Pas encore") + '</h2><div class="score">' + k + ' / ' + n + '</div>' +
+    (passed ? '<div class="label"><div class="star">★</div><b>' + esc(L.badge) + '</b><small>Obtenu le ' + esc((P.done[pk(li, "v")] && P.done[pk(li, "v")].date) || new Date().toLocaleDateString("fr-FR")) + '</small></div>' : "") +
+    '<p>' + (passed ? "Vous avez réussi le quiz final. Merci de votre engagement auprès de votre enfant." : "Il faut " + L.valid.pass + " bonnes réponses sur " + L.valid.n + ". Vous pouvez recommencer avec de nouvelles questions.") + '</p>';
+  if (V.wrong.length) {
+    h += '<div class="errs">' + V.wrong.map(w => '<div><b>' + esc(w.q) + '</b><br>Votre réponse : ' + esc(w.mine) + '<br>Bonne réponse : ' + esc(w.good) + '</div>').join("") + '</div>';
+  }
+  h += '<button class="btn main" data-act="quiz" data-l="' + li + '" type="button">' + (passed ? "Refaire un quiz" : "Recommencer avec de nouvelles questions") + '</button>';
+  if (!passed) h += '<button class="btn sec" data-act="level" data-l="' + li + '" type="button">Revoir les leçons</button>';
+  else h += '<button class="btn sec" data-act="level" data-l="' + li + '" type="button">Retour à la formation</button>';
+  return h + '</div>';
+}
+
+function render() {
+  const v = V.view;
+  document.getElementById("app").innerHTML =
+    v === "home" ? homeHTML() : v === "level" ? levelHTML() : v === "lesson" ? lessonHTML() :
+    v === "deck" ? deckHTML() : v === "result" ? resultHTML() : v === "quiz" ? quizHTML() : qresultHTML();
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- Actions ---------------- */
+function startDeck(li, ti) {
+  V = { view: "deck", li, ti, cards: LEVELS[li].themes[ti].cards.slice(), idx: 0, flipped: false, known: 0, missed: [], full: true };
+  render();
+}
+function nextCard(ok) {
+  if (ok) V.known++; else V.missed.push(V.cards[V.idx]);
+  V.idx++; V.flipped = false;
+  if (V.idx >= V.cards.length) {
+    if (V.full) { P.done[pk(V.li, "t" + V.ti)] = { k: V.known, n: V.cards.length }; saveP(); }
+    V.view = "result";
+  }
+  render();
+}
+function flip() {
+  V.flipped = !V.flipped;
+  const c = document.getElementById("card");
+  c.classList.toggle("flipped", V.flipped);
+  c.querySelector(".front").setAttribute("aria-hidden", String(V.flipped));
+  c.querySelector(".back").setAttribute("aria-hidden", String(!V.flipped));
+  document.getElementById("bRetry").disabled = !V.flipped;
+  document.getElementById("bOk").disabled = !V.flipped;
+  document.getElementById("hint").textContent = V.flipped ? "Vous le saviez ?" : "Touchez la carte pour voir la réponse";
+}
+
+function pickQuiz(L, n) {
+  const bank = shuffled(L.bank), used = new Set(), pick = [];
+  L.themes.forEach((t, ti) => bank.filter(x => x.t === ti).slice(0, 2).forEach(q => { pick.push(q); used.add(q); }));
+  bank.forEach(q => { if (pick.length < n && !used.has(q)) { pick.push(q); used.add(q); } });
+  return shuffled(pick.slice(0, n));
+}
+function startQuiz(li) {
+  const L = LEVELS[li], n = Math.min(L.valid.n, L.bank.length);
+  const qs = pickQuiz(L, n).map(q => Object.assign({}, q, {
+    opts: shuffled([{ t: q.ok, c: true }].concat(q.ko.map(t => ({ t, c: false }))))
+  }));
+  V = { view: "quiz", li, qs, idx: 0, score: 0, chosen: null, answered: false, wrong: [] };
+  render();
+}
+function pick(i) {
+  if (V.answered) return;
+  const q = V.qs[V.idx];
+  V.chosen = i; V.answered = true;
+  if (q.opts[i].c) V.score++;
+  else V.wrong.push({ q: q.q, mine: q.opts[i].t, good: q.ok });
+  render();
+}
+function qnext() {
+  V.idx++; V.chosen = null; V.answered = false;
+  if (V.idx >= V.qs.length) {
+    const L = LEVELS[V.li], passed = V.score >= L.valid.pass, old = P.done[pk(V.li, "v")];
+    P.done[pk(V.li, "v")] = { k: V.score, n: V.qs.length, passed: passed || !!(old && old.passed), date: (old && old.date) || (passed ? new Date().toLocaleDateString("fr-FR") : null) };
+    saveP();
+    V.view = "qresult";
+  }
+  render();
+}
+
+document.addEventListener("click", e => {
+  if (e.target.closest("#card")) { flip(); return; }
+  const t = e.target.closest("[data-act]");
+  if (!t || t.disabled) return;
+  const a = t.dataset.act, l = +t.dataset.l;
+  if (a === "home") { V = { view: "home" }; render(); }
+  else if (a === "level") { V = { view: "level", li: l }; render(); }
+  else if (a === "theme") { V = { view: "lesson", li: l, ti: +t.dataset.i }; render(); }
+  else if (a === "cards") startDeck(V.li, V.ti);
+  else if (a === "yes") nextCard(true);
+  else if (a === "no" || a === "skip") nextCard(false);
+  else if (a === "redo") { V = Object.assign({}, V, { view: "deck", cards: V.missed.slice(), idx: 0, flipped: false, known: 0, missed: [], full: false }); render(); }
+  else if (a === "quiz") startQuiz(l);
+  else if (a === "opt") pick(+t.dataset.i);
+  else if (a === "qnext") qnext();
+});
+document.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && document.activeElement && document.activeElement.id === "card") { e.preventDefault(); flip(); }
+});
+
+loadP();
+render();
+</script>
+</body>
+</html>
