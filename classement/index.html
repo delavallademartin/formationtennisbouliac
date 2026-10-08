@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d5c3c">
+<title>Comprendre le calcul du classement · Formation Bouliac Tennis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef2e4; --ink: #11281b; --muted: #4c6354;
+    --court: #1d5c3c; --court-ink: #f6f9ee; --line: rgba(246, 249, 238, 0.9);
+    --ball: #dcf53c; --ball-ink: #11281b;
+    --panel: #ffffff; --border: #c5d1b8; --track: #d3dcc6;
+    --ok: #1d5c3c; --ok-ink: #f6f9ee;
+    --retry: #ffffff; --retry-ink: #11281b;
+    --focus: #e0561b;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d1a13; --ink: #eaf2de; --muted: #9db3a3;
+      --court: #17503a; --court-ink: #f6f9ee;
+      --ball: #d4ee38; --ball-ink: #11281b;
+      --panel: #16271d; --border: #2d4636; --track: #2a4033;
+      --ok: #dcf53c; --ok-ink: #11281b;
+      --retry: #16271d; --retry-ink: #eaf2de;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d1a13; --ink: #eaf2de; --muted: #9db3a3;
+    --court: #17503a; --court-ink: #f6f9ee;
+    --ball: #d4ee38; --ball-ink: #11281b;
+    --panel: #16271d; --border: #2d4636; --track: #2a4033;
+    --ok: #dcf53c; --ok-ink: #11281b;
+    --retry: #16271d; --retry-ink: #eaf2de;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.45; -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 16px 16px 40px; }
+  h1 { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.85rem; line-height: 1.1; margin: 6px 0 6px; }
+  .sub { margin: 0 0 16px; color: var(--muted); font-size: 1rem; }
+  a.homelink, .link {
+    font: inherit; font-weight: 700; color: var(--muted); background: none; border: 0;
+    padding: 4px 0; cursor: pointer; text-decoration: none;
+  }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .lbl { font-weight: 800; font-size: .85rem; color: var(--muted); }
+
+  /* parcours */
+  .path { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .step {
+    display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+    font: inherit; color: inherit; cursor: pointer;
+    background: var(--panel); border: 1.5px solid var(--border); border-radius: 16px; padding: 14px;
+  }
+  .step .num {
+    flex: none; width: 38px; height: 38px; border-radius: 50%;
+    display: grid; place-items: center; font-family: "Fredoka", system-ui, sans-serif; font-weight: 600; font-size: 1.15rem;
+    background: var(--court); color: var(--court-ink);
+  }
+  .step.final .num { background: var(--ball); color: var(--ball-ink); }
+  .step .txt { flex: 1; }
+  .step .txt b { display: block; font-size: 1.05rem; }
+  .step .txt small { color: var(--muted); font-size: .88rem; }
+  .step .st { flex: none; font-weight: 800; font-size: .85rem; color: var(--court); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .step .st { color: var(--ball); } }
+  :root[data-theme="dark"] .step .st { color: var(--ball); }
+
+  /* points de progression */
+  .dots { display: flex; gap: 6px; margin: 4px 0 12px; }
+  .dot { flex: 1; height: 6px; border-radius: 99px; background: var(--track); }
+  .dot.done { background: var(--court); }
+  .dot.on { background: var(--ball); outline: 1.5px solid var(--court); }
+
+  /* leçon */
+  .lesson { list-style: none; padding: 0; margin: 0 0 14px; display: grid; gap: 10px; }
+  .lesson li { background: var(--panel); border: 1.5px solid var(--border); border-radius: 14px; padding: 12px 14px; }
+  .lesson b { font-weight: 800; }
+  .retenir { background: var(--ball); color: var(--ball-ink); border-radius: 16px; padding: 14px 16px; margin-bottom: 16px; font-weight: 700; }
+  .retenir span { display: block; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; opacity: .75; margin-bottom: 2px; }
+
+  /* boutons */
+  .btn {
+    font: inherit; font-weight: 800; font-size: 1rem; cursor: pointer;
+    padding: 13px 10px; border-radius: 14px; border: 2px solid var(--court);
+    background: var(--court); color: var(--court-ink);
+  }
+  .btn.big { width: 100%; padding: 16px; font-size: 1.1rem; }
+  .btn.ok { background: var(--ok); color: var(--ok-ink); border-color: var(--ok); }
+  .btn.retry, .btn.alt { background: var(--retry); color: var(--retry-ink); border-color: var(--border); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .stack { display: grid; gap: 10px; margin-top: 12px; }
+
+  /* flash cards */
+  .bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: .9rem; color: var(--muted); font-weight: 700; }
+  .track { height: 6px; background: var(--track); border-radius: 99px; overflow: hidden; margin-bottom: 14px; }
+  .fill { height: 100%; width: 0; background: var(--court); transition: width .25s ease; }
+  .scene { perspective: 1200px; }
+  .card {
+    position: relative; display: grid; width: 100%; min-height: 320px; cursor: pointer;
+    transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3,.7,.3,1);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    grid-area: 1 / 1; position: relative; height: 100%; min-height: 320px;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: 18px; padding: 30px 26px;
+    display: flex; flex-direction: column; justify-content: center; gap: 14px;
+  }
+  .front { background: var(--court); color: var(--court-ink); }
+  .front::before { content: ""; position: absolute; inset: 11px; border: 2px solid var(--line); border-radius: 8px; pointer-events: none; }
+  .back { background: var(--ball); color: var(--ball-ink); transform: rotateY(180deg); }
+  .cat { align-self: flex-start; font-weight: 800; font-size: .82rem; padding: 3px 11px; border-radius: 99px; background: rgba(246,249,238,.16); }
+  .back .cat { background: rgba(17,40,27,.12); }
+  .q { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 500; font-size: 1.28rem; line-height: 1.3; margin: 0; }
+  .a { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 700; font-size: 1.7rem; line-height: 1.2; margin: 0; }
+  .n { margin: 0; font-size: 1rem; font-weight: 600; opacity: .85; }
+  .hint { margin: 10px 0 0; text-align: center; font-size: .9rem; color: var(--muted); font-weight: 600; min-height: 1.3em; }
+  .nav { display: flex; justify-content: center; margin-top: 10px; }
+
+  /* résultat */
+  .done { background: var(--court); color: var(--court-ink); border-radius: 18px; padding: 28px 24px; text-align: center; }
+  .done h2 { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 4px; }
+  .done .score { font-family: "Fredoka", "Trebuchet MS", system-ui, sans-serif; font-size: 3rem; font-weight: 700; margin: 2px 0 8px; color: var(--ball); }
+  .done p { margin: 0 0 6px; }
+  .revoir { margin-top: 12px; text-align: left; }
+  .revoir .btn { width: 100%; margin-top: 8px; background: transparent; color: var(--court-ink); border-color: var(--line); text-align: left; }
+  .done .btn.main { width: 100%; background: var(--ball); color: var(--ball-ink); border-color: var(--ball); margin-top: 10px; }
+  .done .btn.sec { width: 100%; background: transparent; color: var(--court-ink); border-color: var(--line); margin-top: 10px; }
+
+  .art { margin-top: 4px; }
+  .art svg { display: block; width: 100%; max-width: 170px; margin: 0 auto; border-radius: 6px; }
+  .goal { font-size: .85rem; font-weight: 700; color: var(--muted); }
+  :root { --good: #d9f2dd; --bad: #f8d7d3; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --good: #1f4a33; --bad: #5a2622; } }
+  :root[data-theme="dark"] { --good: #1f4a33; --bad: #5a2622; }
+  .lesson li.hd { background: none; border: 0; padding: 8px 2px 0; font-weight: 800; font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .step.soon { opacity: .7; cursor: default; }
+  .opts { display: grid; gap: 10px; margin: 14px 0 10px; }
+  .opt { font: inherit; font-weight: 700; text-align: left; cursor: pointer; width: 100%; padding: 14px; border-radius: 14px;
+         background: var(--panel); color: var(--ink); border: 2px solid var(--border); }
+  .opt.good { background: var(--good); border-color: var(--court); }
+  .opt.bad { background: var(--bad); border-color: #b3261e; }
+  .opt:disabled { cursor: default; }
+  .qbox { background: var(--panel); border: 1.5px solid var(--border); border-radius: 16px; padding: 16px; }
+  .qbox .q { color: var(--ink); }
+  .expl { margin: 0 0 10px; font-weight: 600; color: var(--muted); }
+  .errs { text-align: left; margin-top: 12px; display: grid; gap: 8px; }
+  .errs div { background: rgba(246,249,238,.12); border-radius: 12px; padding: 10px 12px; font-size: .92rem; }
+  .errs b { font-weight: 800; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .card, .fill { transition: none; } }
+  @media (max-width: 360px) { .q { font-size: 1.15rem; } .a { font-size: 1.5rem; } .face { padding: 26px 22px; } }
+</style>
+</head>
+<body>
+<main class="wrap" id="app"></main>
+
+<script>
+/* =====================================================================
+   CONTENU : modifiable ici (LEVELS). Un module (Académie) : 4 thèmes, flash cards, banque de questions du quiz de validation (20 questions, objectif 16/20).
+   bank : { t: n° du thème (0 à 3), q, ok: "bonne réponse", ko: ["mauvaises"], n: "explication" }
+   ===================================================================== */
+const LEVELS = [
+{
+  id: "classement", name: "Comprendre le calcul du classement", sub: "Académie",
+  intro: "Pour les joueurs qui veulent comprendre comment on monte de classement : points, victoires prises en compte et V-E-2I-5G, qui peut ajouter comme retirer des victoires. Les normes ne sont pas les mêmes pour les filles et pour les garçons.",
+  valid: { n: 20, pass: 16 }, badge: "",
+  themes: [
+    {
+      title: "Les bases du classement",
+      intro: "Seules tes meilleures victoires comptent.",
+      points: [
+        "## Le principe",
+        "Chaque **victoire** rapporte des **points** selon le classement de l'adversaire **le jour du match**. On compte les matchs des **12 derniers mois**.",
+        "Seules tes **meilleures victoires** comptent. Les **défaites** ne retirent pas de points, mais elles peuvent **réduire** le nombre de victoires prises en compte.",
+        "## Les premiers échelons",
+        "Pour **40/2**, **40/1** et **40**, et **en orange**, seul le **nombre de victoires** compte : **4**, **8** et **12**.",
+        "À partir du **30/5**, on calcule un **bilan en points**.",
+        "## Monter, descendre",
+        "Pour monter à un échelon (sauf 40), il faut avoir battu un joueur **déjà classé à cet échelon**. La descente est limitée à **un échelon** par an.",
+        "## Filles et garçons",
+        "Les normes ne sont **pas les mêmes** chez les femmes et chez les hommes. Dans ce module, on précise toujours **joueuse** ou **joueur**."
+      ],
+      retenir: "4, 8, 12 victoires pour les premiers échelons. Ensuite : un bilan en points, avec des normes différentes pour les filles et les garçons.",
+      cards: [
+        { q: "Combien de victoires faut-il pour être classé 40/2, 40/1 et 40 ?", a: "4 victoires, 8 victoires, 12 victoires.", n: "En orange, seul le nombre de victoires fait changer de classement." },
+        { q: "À partir de quel échelon calcule-t-on un bilan en points ?", a: "À partir du 30/5." },
+        { q: "Quelles victoires comptent dans le calcul ?", a: "Seulement les meilleures.", n: "Leur nombre dépend de l'échelon visé." },
+        { q: "Une défaite retire-t-elle des points ?", a: "Non, mais elle peut réduire le nombre de victoires prises en compte." },
+        { q: "Quel classement de l'adversaire est pris en compte ?", a: "Celui du jour du match." },
+        { q: "Que faut-il pour monter à un échelon (sauf 40) ?", a: "Avoir battu un joueur déjà classé à cet échelon." },
+        { q: "Les normes sont-elles les mêmes pour les filles et les garçons ?", a: "Non : certains bilans minimums sont différents.", n: "On précise toujours joueuse ou joueur." }
+      ]
+    },
+    {
+      title: "Ce que vaut une victoire",
+      intro: "Plus l'adversaire est fort, plus la victoire rapporte.",
+      points: [
+        "On calcule à l'**échelon visé**, appelé **échelon de calcul**. Les échelons montent ainsi : **40, 30/5, 30/4, 30/3, 30/2, 30/1, 30, 15/5…**",
+        "Victoire à **2 échelons ou plus au-dessus** : **120 points**. À **1 échelon au-dessus** : **90**.",
+        "Victoire à **échelon égal** : **60 points**.",
+        "Victoire à **1 échelon en dessous** : **30**. À **2 en dessous** : **20**. À **3 en dessous** : **15**. À **4 ou plus** : **0**.",
+        "Exemple : pour viser le **30/3**, battre un 30/4 rapporte **30 points**, battre un 30/2 rapporte **90 points**."
+      ],
+      retenir: "120, 90, 60, 30, 20, 15, 0 : le barème dépend de l'échelon de l'adversaire par rapport à l'échelon visé.",
+      cards: [
+        { q: "Combien de points rapporte une victoire à 2 échelons ou plus au-dessus de l'échelon de calcul ?", a: "120 points." },
+        { q: "Combien de points rapporte une victoire à 1 échelon au-dessus ?", a: "90 points." },
+        { q: "Combien de points rapporte une victoire à échelon égal ?", a: "60 points." },
+        { q: "Combien de points rapporte une victoire à 1 échelon en dessous ?", a: "30 points." },
+        { q: "Combien de points rapporte une victoire à 2 échelons en dessous ?", a: "20 points.", n: "À 3 échelons en dessous : 15 points." },
+        { q: "Combien de points rapporte une victoire à 4 échelons ou plus en dessous ?", a: "0 point." },
+        { q: "Qu'est-ce que l'échelon de calcul ?", a: "L'échelon auquel le joueur aspire à être." }
+      ]
+    },
+    {
+      title: "Le bilan minimum",
+      intro: "Combien de points pour monter ?",
+      points: [
+        "Ton **bilan** est la somme des points de tes **meilleures victoires**. Pour monter, il doit atteindre le **bilan minimum** de l'échelon visé.",
+        "**Identique** pour les filles et les garçons : **30/5 : 6**, **30/4 : 70**, **30/3 : 120**, **30/2 : 170**, **30/1 : 210**.",
+        "**Joueuses** : **30 : 265**, 15/5 : 295, 15/4 : 305, 15/3 : 310, 15/2 : 330, 15/1 : 350, 15 : 390.",
+        "**Joueurs** : **30 : 285**, 15/5 : 305, 15/4 : 315, 15/3 : 325, 15/2 : 340, 15/1 : 370, 15 : 430.",
+        "**Victoires prises en compte, au départ** : **6** de 30/5 à 30/1, **8** de 30 à 15/1, **9** à 15."
+      ],
+      retenir: "Bilan = points des meilleures victoires. À partir du 30, les normes diffèrent entre joueuses et joueurs.",
+      cards: [
+        { q: "Quel est le bilan minimum pour atteindre le 30/3 ?", a: "120 points.", n: "Pareil chez les filles et les garçons." },
+        { q: "Quel est le bilan minimum pour atteindre le 30/1 ?", a: "210 points." },
+        { q: "Quel est le bilan minimum pour atteindre le 30 ?", a: "Joueuses : 265. Joueurs : 285." },
+        { q: "Quel est le bilan minimum pour atteindre le 15 ?", a: "Joueuses : 390. Joueurs : 430." },
+        { q: "Combien de victoires prend-on en compte de 30/5 à 30/1 ?", a: "6 victoires." },
+        { q: "Combien de victoires prend-on en compte de 30 à 15/1 ?", a: "8 victoires.", n: "À 15 : 9 victoires." }
+      ]
+    },
+    {
+      title: "Le V-E-2I-5G",
+      intro: "Un indicateur de la qualité de ton palmarès.",
+      points: [
+        "Le **V-E-2I-5G** mesure la qualité de ton palmarès : il **ajoute ou retire** des victoires prises en compte.",
+        "**V** = tes victoires. **E** = défaites contre un joueur de **ton échelon**. **I** = défaites **1 échelon en dessous** (comptées **×2**). **G** = défaites **2 échelons ou plus en dessous** (comptées **×5**).",
+        "**4e série (40 à 30/1)** : 0-4 → **+1**, 5-9 → **+2**, 10-14 → **+3**, 15-19 → **+4**, 20-24 → **+5**, 25 et plus → **+6**.",
+        "**3e série (30 à 15/1)** : 0-7 → **+1**, 8-14 → **+2**, 15-22 → **+3**, 23-29 → **+4**, 30-39 → **+5**, 40 et plus → **+6**.",
+        "**2e série positive (15 à 0)** : −41 ou moins → **−3** ; −40 à −31 → **−2** ; −30 à −21 → **−1** ; −20 à −1 → **0** ; 0 à 7 → **+1** ; 8 à 14 → **+2** ; 15 à 22 → **+3** ; 23 à 29 → **+4** ; 30 à 39 → **+5** ; 40 et plus → **+6**.",
+        "Le V-E-2I-5G peut donc être **négatif** : trop de défaites contre des joueurs moins bien classés font **perdre jusqu'à 3 victoires** prises en compte.",
+        "Victoires de base en 2e série positive : **15, 5/6, 4/6 → 9** ; **3/6 → 10** ; **2/6 → 11 (F) / 10 (H)** ; **1/6 → 12 (F) / 11 (H)** ; **0 → 14 (F) / 12 (H)**.",
+        "Exemple : on vise le **30**, avec 14 victoires, 2 défaites contre des 30 et 1 contre un 30/1. 14 − 2 − 2 × 1 = **10** → **+2** : on retient **10 victoires** au lieu de 8.",
+        "Contre-exemple : une **joueuse** vise le 2/6 (11 victoires de base) et son V-E-2I-5G est de −25 → **−1** : elle ne retient que **10 victoires**."
+      ],
+      retenir: "V − E − 2I − 5G : plus les défaites sont contre des joueurs moins bien classés, plus elles coûtent cher. Il peut même retirer des victoires.",
+      cards: [
+        { q: "Que signifie V-E-2I-5G ?", a: "Victoires − défaites à échelon égal − 2 × défaites 1 échelon en dessous − 5 × défaites 2 échelons ou plus en dessous." },
+        { q: "Pourquoi I compte 2 fois et G compte 5 fois ?", a: "Une défaite contre un joueur moins bien classé pèse plus lourd.", n: "Plus l'adversaire est faible, plus la défaite coûte cher." },
+        { q: "À quoi sert le V-E-2I-5G ?", a: "À ajouter ou retirer des victoires prises en compte." },
+        { q: "Le V-E-2I-5G peut-il être négatif ?", a: "Oui : en 2e série positive, il peut retirer jusqu'à 3 victoires." },
+        { q: "En 2e série positive, que se passe-t-il si le V-E-2I-5G est de −41 ou moins ?", a: "On retire 3 victoires prises en compte." },
+        { q: "En 4e série, combien de victoires ajoute-t-on pour un V-E-2I-5G de 10 à 14 ?", a: "3 victoires en plus." },
+        { q: "En 3e série, combien de victoires ajoute-t-on pour un V-E-2I-5G de 8 à 14 ?", a: "2 victoires en plus." },
+        { q: "On vise le 30, V-E-2I-5G = 10. Combien de victoires prises en compte ?", a: "10 victoires.", n: "8 de base + 2 en plus." }
+      ]
+    }
+  ],
+  bank: [
+    { t: 1, q: "On calcule le bilan à l'échelon 30/3. Un joueur bat un adversaire classé 30/4. Combien de points rapporte cette victoire ?", ok: "30 points", ko: ["20 points", "15 points", "0 point"], n: "Victoire 1 échelon en dessous : 30 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30/3. Un joueur bat un adversaire classé 30/2. Combien de points rapporte cette victoire ?", ok: "90 points", ko: ["60 points", "120 points", "30 points"], n: "Victoire 1 échelon au-dessus : 90 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30/3. Un joueur bat un adversaire classé 30/3. Combien de points rapporte cette victoire ?", ok: "60 points", ko: ["30 points", "90 points", "20 points"], n: "Victoire au même échelon : 60 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30/3. Un joueur bat un adversaire classé 30/1. Combien de points rapporte cette victoire ?", ok: "120 points", ko: ["90 points", "60 points", "30 points"], n: "Victoire 2 échelons ou plus au-dessus : 120 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30/3. Un joueur bat un adversaire classé 30/5. Combien de points rapporte cette victoire ?", ok: "20 points", ko: ["15 points", "30 points", "0 point"], n: "Victoire 2 échelons en dessous : 20 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30/3. Un joueur bat un adversaire classé 40. Combien de points rapporte cette victoire ?", ok: "15 points", ko: ["20 points", "0 point", "30 points"], n: "Victoire 3 échelons en dessous : 15 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30/2. Un joueur bat un adversaire classé 40. Combien de points rapporte cette victoire ?", ok: "0 point", ko: ["15 points", "20 points", "30 points"], n: "Victoire 4 échelons ou plus en dessous : 0 point." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30. Un joueur bat un adversaire classé 15/5. Combien de points rapporte cette victoire ?", ok: "90 points", ko: ["60 points", "120 points", "30 points"], n: "Victoire 1 échelon au-dessus : 90 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30. Un joueur bat un adversaire classé 15/4. Combien de points rapporte cette victoire ?", ok: "120 points", ko: ["90 points", "60 points", "30 points"], n: "Victoire 2 échelons ou plus au-dessus : 120 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30. Un joueur bat un adversaire classé 30/1. Combien de points rapporte cette victoire ?", ok: "30 points", ko: ["20 points", "15 points", "0 point"], n: "Victoire 1 échelon en dessous : 30 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30. Un joueur bat un adversaire classé 30/2. Combien de points rapporte cette victoire ?", ok: "20 points", ko: ["15 points", "30 points", "0 point"], n: "Victoire 2 échelons en dessous : 20 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 15/3. Un joueur bat un adversaire classé 15/4. Combien de points rapporte cette victoire ?", ok: "30 points", ko: ["20 points", "15 points", "0 point"], n: "Victoire 1 échelon en dessous : 30 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 15/2. Un joueur bat un adversaire classé 15/5. Combien de points rapporte cette victoire ?", ok: "15 points", ko: ["20 points", "0 point", "30 points"], n: "Victoire 3 échelons en dessous : 15 points." },
+    { t: 1, q: "On calcule le bilan à l'échelon 30/4. Un joueur bat un adversaire classé 30/4. Combien de points rapporte cette victoire ?", ok: "60 points", ko: ["30 points", "90 points", "20 points"], n: "Victoire au même échelon : 60 points." },
+    { t: 2, q: "Quel est le bilan minimum pour atteindre l'échelon 30/4, chez les filles comme chez les garçons ?", ok: "70 points", ko: ["120 points", "170 points", "210 points"] },
+    { t: 2, q: "Quel est le bilan minimum pour atteindre l'échelon 30/3, chez les filles comme chez les garçons ?", ok: "120 points", ko: ["70 points", "170 points", "210 points"] },
+    { t: 2, q: "Quel est le bilan minimum pour atteindre l'échelon 30/1, chez les filles comme chez les garçons ?", ok: "210 points", ko: ["170 points", "265 points", "285 points"] },
+    { t: 2, q: "Quel est le bilan minimum pour qu'une joueuse (classement féminin) atteigne l'échelon 30 ?", ok: "265 points", ko: ["285 points", "295 points", "305 points"], n: "Chez les hommes, c'est 285 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'un joueur (classement masculin) atteigne l'échelon 30 ?", ok: "285 points", ko: ["295 points", "265 points", "305 points"], n: "Chez les femmes, c'est 265 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'une joueuse (classement féminin) atteigne l'échelon 15/5 ?", ok: "295 points", ko: ["285 points", "305 points", "310 points"], n: "Chez les hommes, c'est 305 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'un joueur (classement masculin) atteigne l'échelon 15/5 ?", ok: "305 points", ko: ["310 points", "295 points", "315 points"], n: "Chez les femmes, c'est 295 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'une joueuse (classement féminin) atteigne l'échelon 15/3 ?", ok: "310 points", ko: ["305 points", "315 points", "295 points"], n: "Chez les hommes, c'est 325 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'un joueur (classement masculin) atteigne l'échelon 15/3 ?", ok: "325 points", ko: ["330 points", "315 points", "310 points"], n: "Chez les femmes, c'est 310 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'une joueuse (classement féminin) atteigne l'échelon 15/1 ?", ok: "350 points", ko: ["340 points", "330 points", "370 points"], n: "Chez les hommes, c'est 370 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'un joueur (classement masculin) atteigne l'échelon 15/1 ?", ok: "370 points", ko: ["350 points", "390 points", "340 points"], n: "Chez les femmes, c'est 350 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'une joueuse (classement féminin) atteigne l'échelon 15 ?", ok: "390 points", ko: ["370 points", "350 points", "430 points"], n: "Chez les hommes, c'est 430 points." },
+    { t: 2, q: "Quel est le bilan minimum pour qu'un joueur (classement masculin) atteigne l'échelon 15 ?", ok: "430 points", ko: ["390 points", "370 points", "350 points"], n: "Chez les femmes, c'est 390 points." },
+    { t: 2, q: "Une joueuse vise le 30/2. Combien de victoires prend-on en compte, au départ ?", ok: "6 victoires", ko: ["8 victoires", "9 victoires", "12 victoires"], n: "De 30/5 à 30/1, on retient 6 victoires de base." },
+    { t: 2, q: "Un joueur vise le 15/2. Combien de victoires prend-on en compte, au départ ?", ok: "8 victoires", ko: ["6 victoires", "9 victoires", "12 victoires"], n: "De 30 à 15/1, on retient 8 victoires de base." },
+    { t: 2, q: "Une joueuse vise le 2/6. Combien de victoires de base prend-on en compte ?", ok: "11 victoires", ko: ["10 victoires", "12 victoires", "9 victoires"], n: "Chez les hommes, c'est 10 victoires." },
+    { t: 2, q: "Un joueur vise le 2/6. Combien de victoires de base prend-on en compte ?", ok: "10 victoires", ko: ["11 victoires", "12 victoires", "9 victoires"], n: "Chez les femmes, c'est 11 victoires." },
+    { t: 2, q: "Une joueuse vise le 30/3 (bilan minimum 120). Ses meilleures victoires : 1 à échelon égal, 1 à 1 échelon en dessous, 1 à 2 échelons en dessous. Atteint-elle l'échelon ? On suppose qu'elle a déjà battu une joueuse classée à cet échelon.", ok: "Non (il manque 10 points)", ko: ["Oui", "On ne peut pas savoir sans le V-E-2I-5G"], n: "60 + 30 + 20 = 110, il manque 10 points." },
+    { t: 2, q: "Un joueur vise le 30/3 (bilan minimum 120). Ses meilleures victoires : 2 à échelon égal. Atteint-il l'échelon ? On suppose qu'il a déjà battu un joueur classé à cet échelon.", ok: "Oui", ko: ["Non", "On ne peut pas savoir sans le V-E-2I-5G"], n: "60 + 60 = 120 : le bilan minimum est atteint." },
+    { t: 2, q: "Un joueur vise le 30/4 (bilan minimum 70). Ses meilleures victoires : 1 à échelon égal, 1 à 1 échelon au-dessus. Atteint-il l'échelon ? On suppose qu'il a déjà battu un joueur classé à cet échelon.", ok: "Oui", ko: ["Non", "On ne peut pas savoir sans le V-E-2I-5G"], n: "60 + 90 = 150, soit plus que 70." },
+    { t: 2, q: "Une joueuse vise le 30/2 (bilan minimum 170). Ses meilleures victoires : 2 à échelon égal, 1 à 1 échelon en dessous. Atteint-elle l'échelon ? On suppose qu'elle a déjà battu une joueuse classée à cet échelon.", ok: "Non (il manque 20 points)", ko: ["Oui", "On ne peut pas savoir sans le V-E-2I-5G"], n: "60 + 60 + 30 = 150, il manque 20 points." },
+    { t: 2, q: "Une joueuse vise le 30 (bilan minimum féminin 265). Ses meilleures victoires : 3 à échelon égal, 1 à 1 échelon au-dessus. Atteint-elle l'échelon ? On suppose qu'elle a déjà battu une joueuse classée à cet échelon.", ok: "Oui", ko: ["Non", "On ne peut pas savoir sans le V-E-2I-5G"], n: "180 + 90 = 270, soit plus que 265." },
+    { t: 2, q: "Un joueur vise le 30 (bilan minimum masculin 285). Ses meilleures victoires : 3 à échelon égal, 1 à 1 échelon au-dessus. Atteint-il l'échelon ? On suppose qu'il a déjà battu un joueur classé à cet échelon.", ok: "Non (il manque 15 points)", ko: ["Oui", "On ne peut pas savoir sans le V-E-2I-5G"], n: "270 points : il manque 15 points chez les hommes (285)." },
+    { t: 2, q: "Une joueuse vise le 15/5 (bilan minimum féminin 295). Ses meilleures victoires : 2 à 2 échelons au-dessus, 1 à échelon égal. Atteint-elle l'échelon ? On suppose qu'elle a déjà battu une joueuse classée à cet échelon.", ok: "Oui", ko: ["Non", "On ne peut pas savoir sans le V-E-2I-5G"], n: "120 + 120 + 60 = 300, soit plus que 295." },
+    { t: 2, q: "Un joueur vise le 15/5 (bilan minimum masculin 305). Ses meilleures victoires : 2 à 2 échelons au-dessus, 1 à échelon égal. Atteint-il l'échelon ? On suppose qu'il a déjà battu un joueur classé à cet échelon.", ok: "Non (il manque 5 points)", ko: ["Oui", "On ne peut pas savoir sans le V-E-2I-5G"], n: "300 points : il manque 5 points chez les hommes (305)." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 14 victoires, E = 2 défaites à échelon égal, I = 1 défaite un échelon en dessous, G = 0 défaite deux échelons ou plus en dessous.", ok: "10", ko: ["11", "12", "8"], n: "14 − 2 − 2 × 1 − 5 × 0 = 10." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 12 victoires, E = 3 défaites à échelon égal, I = 1 défaite un échelon en dessous, G = 0 défaite deux échelons ou plus en dessous.", ok: "7", ko: ["8", "9", "5"], n: "12 − 3 − 2 × 1 − 5 × 0 = 7." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 20 victoires, E = 4 défaites à échelon égal, I = 2 défaites un échelon en dessous, G = 1 défaite deux échelons ou plus en dessous.", ok: "7", ko: ["13", "11", "9"], n: "20 − 4 − 2 × 2 − 5 × 1 = 7." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 16 victoires, E = 8 défaites à échelon égal, I = 3 défaites un échelon en dessous, G = 0 défaite deux échelons ou plus en dessous.", ok: "2", ko: ["5", "4", "0"], n: "16 − 8 − 2 × 3 − 5 × 0 = 2." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 25 victoires, E = 5 défaites à échelon égal, I = 2 défaites un échelon en dessous, G = 0 défaite deux échelons ou plus en dessous.", ok: "16", ko: ["18", "14"], n: "25 − 5 − 2 × 2 − 5 × 0 = 16." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 18 victoires, E = 6 défaites à échelon égal, I = 2 défaites un échelon en dessous, G = 1 défaite deux échelons ou plus en dessous.", ok: "3", ko: ["9", "7", "5"], n: "18 − 6 − 2 × 2 − 5 × 1 = 3." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 30 victoires, E = 4 défaites à échelon égal, I = 3 défaites un échelon en dessous, G = 1 défaite deux échelons ou plus en dessous.", ok: "15", ko: ["22", "19", "18"], n: "30 − 4 − 2 × 3 − 5 × 1 = 15." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 10 victoires, E = 2 défaites à échelon égal, I = 1 défaite un échelon en dessous, G = 0 défaite deux échelons ou plus en dessous.", ok: "6", ko: ["7", "8", "4"], n: "10 − 2 − 2 × 1 − 5 × 0 = 6." },
+    { t: 3, q: "Une joueuse vise le 30/2. Son V-E-2I-5G est de 12. Combien de victoires sont prises en compte au total ?", ok: "9 victoires", ko: ["8 victoires", "10 victoires", "7 victoires"], n: "6 victoires de base + 3 en plus = 9." },
+    { t: 3, q: "Une joueuse vise le 30/4. Son V-E-2I-5G est de 7. Combien de victoires sont prises en compte au total ?", ok: "8 victoires", ko: ["7 victoires", "9 victoires", "6 victoires"], n: "6 victoires de base + 2 en plus = 8." },
+    { t: 3, q: "Une joueuse vise le 30/1. Son V-E-2I-5G est de 26. Combien de victoires sont prises en compte au total ?", ok: "12 victoires", ko: ["11 victoires", "10 victoires", "9 victoires"], n: "6 victoires de base + 6 en plus = 12." },
+    { t: 3, q: "Une joueuse vise le 30. Son V-E-2I-5G est de 10. Combien de victoires sont prises en compte au total ?", ok: "10 victoires", ko: ["9 victoires", "11 victoires", "8 victoires"], n: "8 victoires de base + 2 en plus = 10." },
+    { t: 3, q: "Une joueuse vise le 15/3. Son V-E-2I-5G est de 25. Combien de victoires sont prises en compte au total ?", ok: "12 victoires", ko: ["11 victoires", "13 victoires", "10 victoires"], n: "8 victoires de base + 4 en plus = 12." },
+    { t: 3, q: "Une joueuse vise le 15/1. Son V-E-2I-5G est de 5. Combien de victoires sont prises en compte au total ?", ok: "9 victoires", ko: ["8 victoires", "10 victoires", "11 victoires"], n: "8 victoires de base + 1 en plus = 9." },
+    { t: 3, q: "Dans le V-E-2I-5G, que représente le « V » ?", ok: "Le nombre de victoires", ko: ["Le nombre de victoires à échelon égal seulement", "Le nombre de points", "Le nombre de tournois"] },
+    { t: 3, q: "Dans le V-E-2I-5G, que représente le « E » ?", ok: "Les défaites contre un joueur de son échelon", ko: ["Les victoires à l'extérieur", "Les défaites un échelon en dessous", "Les égalités"] },
+    { t: 3, q: "Dans le V-E-2I-5G, une défaite à un échelon en dessous compte…", ok: "2 fois", ko: ["1 fois", "5 fois", "0 fois"] },
+    { t: 3, q: "Dans le V-E-2I-5G, une défaite à 2 échelons ou plus en dessous compte…", ok: "5 fois", ko: ["2 fois", "1 fois", "10 fois"] },
+    { t: 3, q: "À quoi sert le V-E-2I-5G ?", ok: "À ajouter ou retirer des victoires prises en compte", ko: ["À calculer le bilan minimum", "À choisir son adversaire", "À donner des points pour une défaite"] },
+    { t: 0, q: "En orange, qu'est-ce qui permet de changer de classement ?", ok: "Le nombre de victoires", ko: ["Le total de points du bilan", "Le classement des adversaires", "Le nombre de défaites"] },
+    { t: 0, q: "Combien de victoires faut-il pour être classé 40/2 ?", ok: "4 victoires", ko: ["8 victoires", "12 victoires", "2 victoires"] },
+    { t: 0, q: "Combien de victoires faut-il pour être classé 40/1 ?", ok: "8 victoires", ko: ["4 victoires", "12 victoires", "6 victoires"] },
+    { t: 0, q: "Combien de victoires faut-il pour être classé 40 ?", ok: "12 victoires", ko: ["4 victoires", "8 victoires", "10 victoires"] },
+    { t: 0, q: "Seules les meilleures victoires comptent : vrai ou faux ?", ok: "Vrai : on ne retient qu'un nombre limité de victoires", ko: ["Faux : toutes les victoires comptent", "Faux : seules les victoires récentes comptent"] },
+    { t: 0, q: "Une défaite retire-t-elle des points ?", ok: "Non, mais elle peut réduire le nombre de victoires prises en compte", ko: ["Oui, 30 points", "Oui, 60 points", "Non, et elle n'a aucun effet"] },
+    { t: 0, q: "Quel classement de l'adversaire est pris en compte ?", ok: "Celui du jour du match", ko: ["Celui de la fin de saison", "Celui du début d'année", "Le plus élevé de l'année"] },
+    { t: 0, q: "Sur quelle durée compte-t-on les matchs ?", ok: "Les 12 derniers mois", ko: ["Les 3 derniers mois", "La saison civile", "Toute la carrière"] },
+    { t: 0, q: "Pour monter à un échelon (sauf 40), que faut-il avoir fait ?", ok: "Avoir battu un joueur déjà classé à cet échelon", ko: ["Avoir joué 20 matchs", "Ne jamais avoir perdu", "Avoir battu son entraîneur"] },
+    { t: 0, q: "De combien d'échelons peut-on descendre dans l'année ?", ok: "Un échelon au maximum", ko: ["Deux échelons", "Trois échelons", "Autant qu'on veut"] },
+    { t: 0, q: "Le classement féminin et le classement masculin ont-ils les mêmes normes ?", ok: "Non : certains bilans minimums sont différents", ko: ["Oui, exactement les mêmes", "Oui, sauf pour les 40", "Non, il n'y a aucune norme pour les filles"] },
+    { t: 0, q: "Quel est l'ordre des échelons, du plus bas au plus haut ?", ok: "40, 30/5, 30/4, 30/3, 30/2, 30/1, 30", ko: ["30, 30/1, 30/2, 30/3, 30/4, 30/5, 40", "40, 30, 30/1, 30/2, 30/3, 30/4, 30/5", "30/5, 40, 30/4, 30/3, 30/2, 30/1, 30"] },
+    { t: 0, q: "Qu'est-ce que l'échelon de calcul ?", ok: "L'échelon auquel le joueur aspire à être", ko: ["Son classement actuel", "Le classement de son adversaire", "Le meilleur classement de son club"] },
+    { t: 0, q: "Où peut-on faire une simulation de classement ?", ok: "Sur Ten'Up (site ou application)", ko: ["Sur Instagram", "Au secrétariat du club uniquement", "Dans l'application météo"] },
+    { t: 3, q: "Une joueuse (classement féminin) vise l'échelon 15. Son V-E-2I-5G est de −45. Combien de victoires sont prises en compte au total ?", ok: "6 victoires", ko: ["5 victoires", "7 victoires", "4 victoires"], n: "9 victoires de base, V-E-2I-5G −45 → −3 : 6 victoires." },
+    { t: 3, q: "Un joueur (classement masculin) vise l'échelon 15. Son V-E-2I-5G est de −25. Combien de victoires sont prises en compte au total ?", ok: "8 victoires", ko: ["7 victoires", "9 victoires", "6 victoires"], n: "9 victoires de base, V-E-2I-5G −25 → −1 : 8 victoires." },
+    { t: 3, q: "Un joueur (classement masculin) vise l'échelon 3/6. Son V-E-2I-5G est de −35. Combien de victoires sont prises en compte au total ?", ok: "8 victoires", ko: ["7 victoires", "9 victoires", "6 victoires"], n: "10 victoires de base, V-E-2I-5G −35 → −2 : 8 victoires." },
+    { t: 3, q: "Une joueuse (classement féminin) vise l'échelon 2/6. Son V-E-2I-5G est de −25. Combien de victoires sont prises en compte au total ?", ok: "10 victoires", ko: ["9 victoires", "11 victoires", "8 victoires"], n: "11 victoires de base, V-E-2I-5G −25 → −1 : 10 victoires." },
+    { t: 3, q: "Un joueur (classement masculin) vise l'échelon 2/6. Son V-E-2I-5G est de −25. Combien de victoires sont prises en compte au total ?", ok: "9 victoires", ko: ["8 victoires", "10 victoires", "7 victoires"], n: "10 victoires de base, V-E-2I-5G −25 → −1 : 9 victoires." },
+    { t: 3, q: "Une joueuse (classement féminin) vise l'échelon 1/6. Son V-E-2I-5G est de −35. Combien de victoires sont prises en compte au total ?", ok: "10 victoires", ko: ["9 victoires", "11 victoires", "8 victoires"], n: "12 victoires de base, V-E-2I-5G −35 → −2 : 10 victoires." },
+    { t: 3, q: "Un joueur (classement masculin) vise l'échelon 1/6. Son V-E-2I-5G est de −35. Combien de victoires sont prises en compte au total ?", ok: "9 victoires", ko: ["8 victoires", "10 victoires", "7 victoires"], n: "11 victoires de base, V-E-2I-5G −35 → −2 : 9 victoires." },
+    { t: 3, q: "Une joueuse (classement féminin) vise l'échelon 0. Son V-E-2I-5G est de −41. Combien de victoires sont prises en compte au total ?", ok: "11 victoires", ko: ["10 victoires", "12 victoires", "9 victoires"], n: "14 victoires de base, V-E-2I-5G −41 → −3 : 11 victoires." },
+    { t: 3, q: "Un joueur (classement masculin) vise l'échelon 0. Son V-E-2I-5G est de −41. Combien de victoires sont prises en compte au total ?", ok: "9 victoires", ko: ["8 victoires", "10 victoires", "7 victoires"], n: "12 victoires de base, V-E-2I-5G −41 → −3 : 9 victoires." },
+    { t: 3, q: "Une joueuse (classement féminin) vise l'échelon 0. Son V-E-2I-5G est de 42. Combien de victoires sont prises en compte au total ?", ok: "20 victoires", ko: ["19 victoires", "21 victoires", "18 victoires"], n: "14 victoires de base, V-E-2I-5G 42 → +6 : 20 victoires." },
+    { t: 3, q: "Un joueur (classement masculin) vise l'échelon 1/6. Son V-E-2I-5G est de 18. Combien de victoires sont prises en compte au total ?", ok: "14 victoires", ko: ["13 victoires", "15 victoires", "12 victoires"], n: "11 victoires de base, V-E-2I-5G 18 → +3 : 14 victoires." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 6 victoires, E = 5 défaites à échelon égal, I = 3 défaites un échelon en dessous, G = 1 défaite deux échelons ou plus en dessous.", ok: "−10", ko: ["−3", "−6", "−7"], n: "6 − 5 − 2 × 3 − 5 × 1 = −10 : le résultat est négatif." },
+    { t: 3, q: "Calcule le V-E-2I-5G : V = 4 victoires, E = 6 défaites à échelon égal, I = 2 défaites un échelon en dessous, G = 0 défaite deux échelons ou plus en dessous.", ok: "−6", ko: ["−4", "−3"], n: "4 − 6 − 2 × 2 − 5 × 0 = −6 : le résultat est négatif." },
+    { t: 3, q: "Le V-E-2I-5G peut-il être négatif ?", ok: "Oui : il peut alors retirer des victoires prises en compte", ko: ["Non, il ne peut qu'ajouter des victoires", "Oui, mais sans aucune conséquence", "Non, il vaut toujours 0 ou plus"] },
+    { t: 3, q: "En 2e série positive, un V-E-2I-5G de −45 retire combien de victoires ?", ok: "3 victoires", ko: ["1 victoire", "2 victoires", "5 victoires"], n: "−41 ou moins : −3." },
+    { t: 3, q: "Combien de victoires prises en compte peut-on perdre, au maximum, en 2e série positive ?", ok: "3 victoires", ko: ["1 victoire", "5 victoires", "10 victoires"] },
+    { t: 3, q: "En 2e série positive, un V-E-2I-5G de −10 change-t-il le nombre de victoires prises en compte ?", ok: "Non : de −20 à −1, c'est 0", ko: ["Oui, −1 victoire", "Oui, −2 victoires", "Oui, +1 victoire"] },
+    { t: 3, q: "Un joueur gagne beaucoup mais perd souvent contre des joueurs moins bien classés. Que peut-il se passer ?", ok: "Son V-E-2I-5G baisse et on retient moins de victoires", ko: ["Il gagne des points à chaque défaite", "Rien : les défaites ne comptent jamais", "On retient plus de victoires"] },
+    { t: 3, q: "Une défaite contre un joueur beaucoup moins bien classé (G) pèse…", ok: "Cinq fois plus qu'une défaite à échelon égal", ko: ["Autant qu'une défaite à échelon égal", "Deux fois plus", "Moins qu'une défaite à échelon égal"] },
+  ]
+}
+];
+
+/* ---------------- Terrain entier avec joueurs et balle (vue de dessus) ---------------- */
+const CS = 14, CMX = 1.3, CMY = 2.0, CW = 10.97, CL = 11.885, CSL = 6.4, CAL = 1.37, CR = 6;
+function court(img, label) {
+  const w = (CW + 2 * CMX) * CS, h = (2 * CL + 2 * CMY) * CS;
+  const X = v => (CMX + v) * CS, Y = v => (CMY + v) * CS;
+  const ln = (a, b, c, d) => '<line x1="' + X(a) + '" y1="' + Y(b) + '" x2="' + X(c) + '" y2="' + Y(d) + '"/>';
+  const bx = img.x, by = img.far ? CL - img.d : CL + img.d;
+  const hitTop = img.srv ? true : !img.far;
+  const hl = img.srv ? "Serveur" : (img.hl || "Frappeur"), ol = img.srv ? "Relanceur" : (img.ol || "Adversaire");
+  const topY = -0.8, botY = 2 * CL + 0.8;
+  const hy = hitTop ? topY : botY, oy = hitTop ? botY : topY;
+  const hx = img.srv ? CW / 2 + (img.srv === "droite" ? -1.4 : 1.4) : CW / 2;
+  const ox = img.srv ? CW / 2 : (bx < CW / 2 ? CW / 2 + 1.0 : CW / 2 - 1.0);
+  const px = v => Math.abs(v - CW / 2) < 0.5 ? CW / 2 + 2.5 : CW - v;
+  const pl = (x, y, fill, stroke, r, text, dir) => {
+    let s = '<circle cx="' + X(x) + '" cy="' + Y(y) + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5"/>';
+    if (text) {
+      const right = dir ? dir === "r" : X(x) <= w / 2 + 1;
+      s += '<text x="' + (X(x) + (right ? 13 : -13)) + '" y="' + (Y(y) + 4) + '" font-size="11" fill="#ffffff" text-anchor="' + (right ? "start" : "end") + '">' + esc(text) + '</text>';
+    }
+    return s;
+  };
+  let s = '<svg viewBox="0 0 ' + w + ' ' + h + '" role="img"><title>' + esc(label) + '</title>';
+  s += '<rect x="0" y="0" width="' + w + '" height="' + h + '" fill="#3f8a55"/>';
+  s += '<rect x="' + X(0) + '" y="' + Y(0) + '" width="' + (CW * CS) + '" height="' + (2 * CL * CS) + '" fill="#2f6db5"/>';
+  s += '<g stroke="#ffffff" stroke-width="2.2" fill="none" stroke-linecap="square">';
+  s += ln(0, 0, CW, 0) + ln(0, 2 * CL, CW, 2 * CL) + ln(0, 0, 0, 2 * CL) + ln(CW, 0, CW, 2 * CL) + ln(CAL, 0, CAL, 2 * CL) + ln(CW - CAL, 0, CW - CAL, 2 * CL);
+  s += ln(CAL, CL - CSL, CW - CAL, CL - CSL) + ln(CAL, CL + CSL, CW - CAL, CL + CSL) + ln(CW / 2, CL - CSL, CW / 2, CL + CSL);
+  s += ln(CW / 2, 0, CW / 2, 0.45) + ln(CW / 2, 2 * CL, CW / 2, 2 * CL - 0.45) + '</g>';
+  s += '<rect x="' + (X(0) - 6) + '" y="' + (Y(CL) - 2.5) + '" width="' + (CW * CS + 12) + '" height="5" fill="#f2f2f2" stroke="#444444" stroke-width="0.5"/>';
+  s += '<line x1="' + X(hx) + '" y1="' + Y(hy) + '" x2="' + X(bx) + '" y2="' + Y(by) + '" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85"/>';
+  if (img.dbl) {
+    s += pl(px(hx), hitTop ? CL - 1.8 : CL + 1.8, "#ff7a1a", "#ffffff", 6, "");
+    s += pl(px(ox), hitTop ? CL + 1.8 : CL - 1.8, "#f2f2f2", "#444444", 6, "");
+  }
+  s += pl(hx, hy, "#ff7a1a", "#ffffff", 7, hl);
+  s += pl(ox, oy, "#f2f2f2", "#444444", 7, ol, img.srv ? "" : (bx < CW / 2 ? "r" : "l"));
+  s += '<circle cx="' + X(bx) + '" cy="' + Y(by) + '" r="' + CR + '" fill="#d9e83f" stroke="#6f7d0c" stroke-width="1"/></svg>';
+  return s;
+}
+
+/* ---------------- Progression (gardée sur l'appareil) ---------------- */
+const KEY = "formation-tcb-classement-v1";
+let P = { done: {} };
+function loadP() { try { const d = JSON.parse(localStorage.getItem(KEY) || "null"); if (d && d.done) P = d; } catch (e) {} }
+function saveP() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) {} }
+function pk(li, x) { return LEVELS[li].id + "-" + x; }
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function fmt(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"); }
+function shuffled(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+let V = { view: "level", li: 0 };
+
+function dots(li, active) {
+  const L = LEVELS[li];
+  let h = '<div class="dots" aria-hidden="true">';
+  for (let i = 0; i <= L.themes.length; i++) {
+    const key = pk(li, i === L.themes.length ? "v" : "t" + i);
+    const d = P.done[key];
+    h += '<span class="dot' + (i === active ? " on" : (d && (i < L.themes.length || d.passed)) ? " done" : "") + '"></span>';
+  }
+  return h + '</div>';
+}
+
+/* ---------------- Vues ---------------- */
+function homeHTML() {
+  let h = '<a class="homelink" href="../">← Accueil</a><h1>Devenir jeune arbitre</h1>' +
+    '<p class="sub">Deux niveaux de formation. Chaque niveau : des leçons, des flash cards pour réviser, puis un quiz de validation.</p><ol class="path">';
+  LEVELS.forEach((L, i) => {
+    if (L.soon) {
+      h += '<li><div class="step soon"><span class="num">' + (i + 1) + '</span><span class="txt"><b>' + esc(L.name) + '</b><small>' + esc(L.sub) + ' · ' + esc(L.intro) + '</small></span><span class="st">Bientôt</span></div></li>';
+    } else {
+      const v = P.done[pk(i, "v")];
+      h += '<li><button class="step" data-act="level" data-l="' + i + '" type="button"><span class="num">' + (i + 1) + '</span>' +
+        '<span class="txt"><b>' + esc(L.name) + '</b><small>' + esc(L.sub) + ' · ' + esc(L.intro) + '</small></span>' +
+        (v && v.passed ? '<span class="st">✓ Validé</span>' : "") + '</button></li>';
+    }
+  });
+  return h + '</ol>';
+}
+
+function levelHTML() {
+  const li = V.li, L = LEVELS[li], v = P.done[pk(li, "v")];
+  let h = '<div class="topbar"><a class="homelink" href="../">← Accueil</a><span class="lbl">' + esc(L.sub) + '</span></div>' +
+    '<h1>' + esc(L.name) + '</h1><p class="sub">' + esc(L.intro) + '</p>' +
+    '<div class="valider"><b>Pour valider ce module</b><ul><li>Suivre les ' + L.themes.length + ' thèmes : une leçon, puis des flash cards pour réviser.</li>' +
+    '<li>Réussir le quiz de validation : ' + L.valid.pass + ' bonnes réponses sur ' + L.valid.n + '.</li></ul></div><ol class="path">';
+  L.themes.forEach((t, i) => {
+    const d = P.done[pk(li, "t" + i)];
+    h += '<li><button class="step" data-act="theme" data-l="' + li + '" data-i="' + i + '" type="button"><span class="num">' + (i + 1) + '</span>' +
+      '<span class="txt"><b>' + esc(t.title) + '</b><small>' + esc(t.intro) + '</small></span>' +
+      (d ? '<span class="st">✓ ' + d.k + '/' + d.n + '</span>' : "") + '</button></li>';
+  });
+  h += '<li><button class="step final" data-act="quiz" data-l="' + li + '" type="button"><span class="num">★</span>' +
+    '<span class="txt"><b>Quiz de validation</b><small>' + L.valid.n + ' questions au hasard parmi ' + L.bank.length + ' · validation à ' + L.valid.pass + '/' + L.valid.n + '</small></span>' +
+    (v ? '<span class="st">' + (v.passed ? "✓ Validé" : "Dernier : " + v.k + "/" + v.n) + '</span>' : "") + '</button></li></ol>';
+  return h;
+}
+
+function lessonHTML() {
+  const li = V.li, i = V.ti, L = LEVELS[li], t = L.themes[i];
+  const items = t.points.map(p => p.indexOf("## ") === 0 ? '<li class="hd">' + esc(p.slice(3)) + '</li>' : '<li>' + fmt(p) + '</li>').join("");
+  return '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← Module</button>' +
+    '<span class="lbl">Thème ' + (i + 1) + ' sur ' + L.themes.length + '</span></div>' + dots(li, i) +
+    '<h1>' + esc(t.title) + '</h1><p class="sub">' + esc(t.intro) + '</p>' +
+    '<ul class="lesson">' + items + '</ul>' +
+    '<div class="retenir"><span>À retenir</span>' + esc(t.retenir) + '</div>' +
+    '<button class="btn big" data-act="cards" type="button">Réviser avec les flash cards (' + t.cards.length + ')</button>';
+}
+
+function deckHTML() {
+  const total = V.cards.length, k = V.cards[V.idx], L = LEVELS[V.li];
+  return '<div class="topbar"><button class="link" data-act="level" data-l="' + V.li + '" type="button">← Module</button>' +
+    '<span class="lbl">Flash cards · Thème ' + (V.ti + 1) + '</span></div>' +
+    '<div class="bar"><span>Carte ' + (V.idx + 1) + ' sur ' + total + '</span></div>' +
+    '<div class="track" aria-hidden="true"><div class="fill" style="width:' + (V.idx / total * 100) + '%"></div></div>' +
+    '<div class="scene"><div class="card' + (V.flipped ? " flipped" : "") + '" id="card" role="button" tabindex="0" aria-label="Carte : retourner pour voir la réponse">' +
+      '<div class="face front" aria-hidden="' + V.flipped + '"><span class="cat">' + esc(L.themes[V.ti].title) + '</span><p class="q">' + esc(k.q) + '</p>' +
+        (k.img ? '<div class="art">' + court(k.img, k.q) + '</div>' : "") + '</div>' +
+      '<div class="face back" aria-hidden="' + (!V.flipped) + '"><span class="cat">Réponse</span><p class="a">' + esc(k.a) + '</p>' + (k.n ? '<p class="n">' + esc(k.n) + '</p>' : "") + '</div>' +
+    '</div></div>' +
+    '<p class="hint" id="hint">' + (V.flipped ? "Tu le savais ?" : "Touche la carte pour voir la réponse") + '</p>' +
+    '<div class="actions"><button class="btn retry" id="bRetry" data-act="no" type="button"' + (V.flipped ? "" : " disabled") + '>À revoir</button>' +
+    '<button class="btn ok" id="bOk" data-act="yes" type="button"' + (V.flipped ? "" : " disabled") + '>Je savais</button></div>' +
+    '<div class="nav"><button class="link" data-act="skip" type="button">Passer</button></div>';
+}
+
+function resultHTML() {
+  const li = V.li, L = LEVELS[li], n = V.cards.length, k = V.known, miss = V.missed;
+  const msg = k === n ? "Parfait, aucune erreur !" : k / n >= 0.7 ? "Bien joué !" : "Continue, tu progresses !";
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← Module</button><span class="lbl">Thème ' + (V.ti + 1) + '</span></div>' +
+    '<div class="done"><h2>' + msg + '</h2><div class="score">' + k + ' / ' + n + '</div>';
+  if (miss.length) h += '<button class="btn main" data-act="redo" type="button">Refaire les ' + miss.length + ' cartes à revoir</button>';
+  const cls = miss.length ? "sec" : "main";
+  if (V.ti < L.themes.length - 1) {
+    h += '<button class="btn ' + cls + '" data-act="theme" data-l="' + li + '" data-i="' + (V.ti + 1) + '" type="button">Thème suivant : ' + esc(L.themes[V.ti + 1].title) + '</button>';
+  } else {
+    h += '<button class="btn ' + cls + '" data-act="quiz" data-l="' + li + '" type="button">Passer au quiz de validation</button>';
+  }
+  return h + '<button class="btn sec" data-act="level" data-l="' + li + '" type="button">Retour au module</button></div>';
+}
+
+function quizHTML() {
+  const L = LEVELS[V.li], q = V.qs[V.idx], total = V.qs.length;
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + V.li + '" type="button">← Module</button>' +
+    '<span class="lbl">Quiz de validation</span></div>' +
+    '<div class="bar"><span>Question ' + (V.idx + 1) + ' sur ' + total + '</span><span>Objectif : ' + L.valid.pass + '/' + L.valid.n + '</span></div>' +
+    '<div class="track" aria-hidden="true"><div class="fill" style="width:' + (V.idx / total * 100) + '%"></div></div>' +
+    '<div class="qbox"><p class="q">' + esc(q.q) + '</p>' + (q.img ? '<div class="art">' + court(q.img, q.q) + '</div>' : "") + '</div><div class="opts">';
+  q.opts.forEach((o, i) => {
+    let cls = "opt";
+    if (V.answered) cls += o.c ? " good" : (i === V.chosen ? " bad" : "");
+    h += '<button class="' + cls + '" data-act="opt" data-i="' + i + '" type="button"' + (V.answered ? " disabled" : "") + '>' + esc(o.t) + '</button>';
+  });
+  h += '</div>';
+  if (V.answered) {
+    const good = q.opts[V.chosen].c;
+    h += '<p class="expl">' + (good ? "Bonne réponse !" : "Pas tout à fait.") + (q.n ? " " + esc(q.n) : "") + '</p>' +
+      '<button class="btn big" data-act="qnext" type="button">' + (V.idx + 1 < total ? "Question suivante" : "Voir mon résultat") + '</button>';
+  }
+  return h;
+}
+
+function qresultHTML() {
+  const li = V.li, L = LEVELS[li], n = V.qs.length, k = V.score, passed = k >= L.valid.pass;
+  let h = '<div class="topbar"><button class="link" data-act="level" data-l="' + li + '" type="button">← Module</button><span class="lbl">Quiz de validation</span></div>' +
+    '<div class="done"><h2>' + (passed ? "Bravo, module validé !" : "Pas encore validé") + '</h2><div class="score">' + k + ' / ' + n + '</div>' +
+    '<p>' + (passed ? "Tu as réussi le quiz de validation." : "Il faut " + L.valid.pass + " bonnes réponses sur " + L.valid.n + ". Tu peux recommencer avec de nouvelles questions.") + '</p>';
+  if (V.wrong.length) {
+    h += '<div class="errs">' + V.wrong.map(w => '<div><b>' + esc(w.q) + '</b><br>Ta réponse : ' + esc(w.mine) + '<br>Bonne réponse : ' + esc(w.good) + '</div>').join("") + '</div>';
+  }
+  h += '<button class="btn main" data-act="quiz" data-l="' + li + '" type="button">' + (passed ? "Refaire un quiz" : "Recommencer avec de nouvelles questions") + '</button>';
+  if (!passed) h += '<button class="btn sec" data-act="level" data-l="' + li + '" type="button">Revoir les leçons</button>';
+  else h += '<button class="btn sec" data-act="level" data-l="' + li + '" type="button">Retour au module</button>';
+  return h + '</div>';
+}
+
+function render() {
+  const v = V.view;
+  document.getElementById("app").innerHTML =
+    v === "home" ? homeHTML() : v === "level" ? levelHTML() : v === "lesson" ? lessonHTML() :
+    v === "deck" ? deckHTML() : v === "result" ? resultHTML() : v === "quiz" ? quizHTML() : qresultHTML();
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- Actions ---------------- */
+function startDeck(li, ti) {
+  V = { view: "deck", li, ti, cards: LEVELS[li].themes[ti].cards.slice(), idx: 0, flipped: false, known: 0, missed: [], full: true };
+  render();
+}
+function nextCard(ok) {
+  if (ok) V.known++; else V.missed.push(V.cards[V.idx]);
+  V.idx++; V.flipped = false;
+  if (V.idx >= V.cards.length) {
+    if (V.full) { P.done[pk(V.li, "t" + V.ti)] = { k: V.known, n: V.cards.length }; saveP(); }
+    V.view = "result";
+  }
+  render();
+}
+function flip() {
+  V.flipped = !V.flipped;
+  const c = document.getElementById("card");
+  c.classList.toggle("flipped", V.flipped);
+  c.querySelector(".front").setAttribute("aria-hidden", String(V.flipped));
+  c.querySelector(".back").setAttribute("aria-hidden", String(!V.flipped));
+  document.getElementById("bRetry").disabled = !V.flipped;
+  document.getElementById("bOk").disabled = !V.flipped;
+  document.getElementById("hint").textContent = V.flipped ? "Tu le savais ?" : "Touche la carte pour voir la réponse";
+}
+
+function pickQuiz(L, n) {
+  const bank = shuffled(L.bank), used = new Set(), pick = [];
+  L.themes.forEach((t, ti) => bank.filter(x => x.t === ti).slice(0, Math.floor(n / L.themes.length)).forEach(q => { pick.push(q); used.add(q); }));
+  bank.forEach(q => { if (pick.length < n && !used.has(q)) { pick.push(q); used.add(q); } });
+  return shuffled(pick.slice(0, n));
+}
+function startQuiz(li) {
+  const L = LEVELS[li], n = Math.min(L.valid.n, L.bank.length);
+  const qs = pickQuiz(L, n).map(q => Object.assign({}, q, {
+    opts: shuffled([{ t: q.ok, c: true }].concat(q.ko.map(t => ({ t, c: false }))))
+  }));
+  V = { view: "quiz", li, qs, idx: 0, score: 0, chosen: null, answered: false, wrong: [] };
+  render();
+}
+function pick(i) {
+  if (V.answered) return;
+  const q = V.qs[V.idx];
+  V.chosen = i; V.answered = true;
+  if (q.opts[i].c) V.score++;
+  else V.wrong.push({ q: q.q, mine: q.opts[i].t, good: q.ok });
+  render();
+}
+function qnext() {
+  V.idx++; V.chosen = null; V.answered = false;
+  if (V.idx >= V.qs.length) {
+    const L = LEVELS[V.li], passed = V.score >= L.valid.pass, old = P.done[pk(V.li, "v")];
+    P.done[pk(V.li, "v")] = { k: V.score, n: V.qs.length, passed: passed || !!(old && old.passed) };
+    saveP();
+    V.view = "qresult";
+  }
+  render();
+}
+
+document.addEventListener("click", e => {
+  if (e.target.closest("#card")) { flip(); return; }
+  const t = e.target.closest("[data-act]");
+  if (!t || t.disabled) return;
+  const a = t.dataset.act, l = +t.dataset.l;
+  if (a === "home") { V = { view: "home" }; render(); }
+  else if (a === "level") { V = { view: "level", li: l }; render(); }
+  else if (a === "theme") { V = { view: "lesson", li: l, ti: +t.dataset.i }; render(); }
+  else if (a === "cards") startDeck(V.li, V.ti);
+  else if (a === "yes") nextCard(true);
+  else if (a === "no" || a === "skip") nextCard(false);
+  else if (a === "redo") { V = Object.assign({}, V, { view: "deck", cards: V.missed.slice(), idx: 0, flipped: false, known: 0, missed: [], full: false }); render(); }
+  else if (a === "quiz") startQuiz(l);
+  else if (a === "opt") pick(+t.dataset.i);
+  else if (a === "qnext") qnext();
+});
+document.addEventListener("keydown", e => {
+  if ((e.key === "Enter" || e.key === " ") && document.activeElement && document.activeElement.id === "card") { e.preventDefault(); flip(); }
+});
+
+loadP();
+render();
+</script>
+</body>
+</html>
